@@ -69,9 +69,18 @@ export default class LoginScreen extends React.Component {
     }
   };
 
+  init = async () => {
+    const {customSetState} = this.props;
+    await this.getCurrentUserInfo().then(() => {
+      setTimeout(() => {
+        customSetState({isLoaded: true});
+      }, 3000);
+    });
+  };
+
   componentDidMount() {
     this.configureGoogleSign();
-    this.getCurrentUserInfo();
+    this.init();
   }
 
   render() {

@@ -1,8 +1,11 @@
 import React from 'react';
-import {Dimensions} from 'react-native';
+import {Dimensions, View} from 'react-native';
+import SplashScreen from 'react-native-splash-screen';
+import firestore from '@react-native-firebase/firestore';
 
 import LoginScreen from './screens/loginScreen';
 import DashScreen from './screens/dashScreen';
+import Splash from './screens/splash';
 
 import Blob1 from './assets/images/blob1.png';
 import Blob2 from './assets/images/blob2.png';
@@ -12,6 +15,7 @@ import Text from './assets/images/text.png';
 import Close from './assets/images/close.png';
 import Cancel from './assets/images/cancel.png';
 import Tick from './assets/images/tick.png';
+import Logo from './assets/images/logo.png';
 
 import {WEB_CLIENT_ID} from './utils/keys';
 import {Todos} from './utils/todos';
@@ -29,6 +33,7 @@ export default class App extends React.Component {
       close: Close,
       cancel: Cancel,
       tick: Tick,
+      logo: Logo,
     },
     devInfo: {
       height: height,
@@ -50,6 +55,19 @@ export default class App extends React.Component {
       user: null,
     },
     todos: [],
+    currentTodo: {
+      id: null,
+      title: null,
+      location: null,
+      latitude: null,
+      longitude: null,
+      placeId: null,
+      isActive: true,
+      isComplete: false,
+    },
+    isLoaded: false,
+    todosLoading: false,
+    isEditing: false,
   };
 
   customSetState = stateJSON => {
@@ -57,29 +75,99 @@ export default class App extends React.Component {
   };
 
   loadTodos = async () => {
+    this.setState({todosLoading: true});
     const {user} = this.state;
     const {info} = user;
     const refs = Todos();
-    const todos = [];
-    await refs
-      .where('userId', '==', info.user.id)
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          todos.push({...doc.data()});
+    let todos = [];
+    if (refs) {
+      await refs
+        .where('userId', '==', info.user.id)
+        .where('isActive', '==', true)
+        .where('isComplete', '==', false)
+        .orderBy('createdAt', 'desc')
+        .get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            todos = [{...doc.data()}, ...todos];
+          });
         });
-      });
+    }
 
-    this.setState({todos});
+    this.setState({todos}, () => {
+      this.setState({todosLoading: false});
+    });
   };
 
-  render() {
-    const {user} = this.state;
+  addTodos = async () => {
+    const {user, currentTodo} = this.state;
+    const {info} = user;
+    const refs = Todos();
+    await refs.add({
+      ...currentTodo,
+      userId: info,
+      createdAt: firestore.FieldValue.serverTimestamp(),
+    });
+  };
 
-    return !user.isLoggedIn ? (
-      <LoginScreen states={this.state} customSetState={this.customSetState} />
-    ) : (
-      <DashScreen states={this.state} loadTodos={this.loadTodos} />
+  updateTodos = async todoId => {
+    const {user, currentTodo} = this.state;
+    const {info} = user;
+    const refs = Todos();
+    await refs.doc(todoId).update({
+      ...currentTodo,
+      userId: info,
+      updatedAt: firestore.FieldValue.serverTimestamp(),
+    });
+  };
+
+  deleteTodos = async todoId => {
+    const {user, currentTodo} = this.state;
+    const {info} = user;
+    const refs = Todos();
+    await refs.doc(todoId).update({
+      ...currentTodo,
+      userId: info,
+      isActive: false,
+      updatedAt: firestore.FieldValue.serverTimestamp(),
+    });
+  };
+
+  handleEditTodos = currentTodo => {
+    this.setState({currentTodo});
+  };
+
+  componentDidMount() {
+    SplashScreen.hide();
+  }
+
+  render() {
+    const {user, isLoaded} = this.state;
+
+    if (user.isLoggedIn && isLoaded) {
+      return (
+        <DashScreen
+          states={this.state}
+          loadTodos={this.loadTodos}
+          customSetState={this.customSetState}
+          addTodos={this.addTodos}
+          updateTodos={this.updateTodos}
+          deleteTodos={this.deleteTodos}
+          handleEditTodos={this.handleEditTodos}
+        />
+      );
+    }
+
+    return (
+      <View>
+        {!isLoaded && <Splash states={this.state} />}
+        {!user.isLoggedIn && (
+          <LoginScreen
+            states={this.state}
+            customSetState={this.customSetState}
+          />
+        )}
+      </View>
     );
   }
 }

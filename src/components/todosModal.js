@@ -1,15 +1,103 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {View, TouchableOpacity, Image, Text, TextInput} from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  Image,
+  Text,
+  TextInput,
+  Dimensions,
+  Alert,
+} from 'react-native';
+import RNGooglePlaces from 'react-native-google-places';
+
+const {width} = Dimensions.get('window');
 
 export default class TodosModal extends React.Component {
+  state = {
+    predictions: [],
+    showPredictions: false,
+    isLocationEditable: true,
+    mapError: null,
+  };
+
+  placeFinder = q => {
+    if (q.length < 2) {
+      return;
+    }
+    RNGooglePlaces.getAutocompletePredictions(
+      q,
+      {
+        type: 'geocode',
+        country: 'IN',
+      },
+      ['placeID', 'location', 'name', 'address'],
+    )
+      .then(results => this.setState({predictions: results}))
+      .catch(error => Alert.alert(error.toString()));
+  };
+
+  placeUpdate = prediction => {
+    const {states, customSetState} = this.props;
+    const {currentTodo} = states;
+    const {placeID, primaryText} = prediction;
+    customSetState({
+      currentTodo: {...currentTodo, placeId: placeID, location: primaryText},
+    });
+    this.setState({showPredictions: false, isLocationEditable: false});
+    RNGooglePlaces.lookUpPlaceByID(placeID, ['location'])
+      .then(({location}) => {
+        customSetState({
+          currentTodo: {
+            ...this.props.states.currentTodo,
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+        });
+      })
+      .catch(error => {
+        console.log(error.message, 'ERR');
+        this.setState({isLocationEditable: true});
+        Alert.alert(error.message.toString());
+      });
+  };
+
   render() {
-    const {states, toggleAction} = this.props;
-    const {assets} = states;
+    const {predictions, showPredictions, isLocationEditable} = this.state;
+    const {
+      states,
+      toggleAction,
+      customSetState,
+      addTodos,
+      updateTodos,
+      deleteTodos,
+    } = this.props;
+    const {assets, currentTodo, isEditing} = states;
     const {pin, text, close} = assets;
 
+    let isSaveDisabled = true;
+    if (
+      currentTodo.title !== null &&
+      currentTodo.title.length > 0 &&
+      currentTodo.location !== null &&
+      currentTodo.location.length > 0 &&
+      currentTodo.latitude !== null &&
+      currentTodo.longitude !== null &&
+      currentTodo.placeID !== null
+    ) {
+      if (isEditing) {
+        if (currentTodo.id !== null) {
+          isSaveDisabled = false;
+        } else {
+          isSaveDisabled = true;
+        }
+      } else {
+        isSaveDisabled = false;
+      }
+    }
+
     return (
-      <View style={{flex: 1}}>
+      <View>
         <View
           style={{
             flexDirection: 'row',
@@ -24,7 +112,7 @@ export default class TodosModal extends React.Component {
               color: '#fff',
               flex: 1,
             }}>
-            Add Todo
+            {isEditing ? 'Update' : 'Add'} Todo
           </Text>
           <TouchableOpacity
             style={{
@@ -70,6 +158,10 @@ export default class TodosModal extends React.Component {
               paddingLeft: 0,
               paddingVertical: 10,
             }}
+            value={currentTodo.title}
+            onChangeText={txt =>
+              customSetState({currentTodo: {...currentTodo, title: txt}})
+            }
           />
         </View>
         <Text
@@ -83,13 +175,14 @@ export default class TodosModal extends React.Component {
         </Text>
         <View
           style={{
-            marginBottom: 10,
+            marginBottom: !isEditing ? 15 : 10,
             borderWidth: 1,
             borderRadius: 10,
             borderColor: '#fff',
             flexDirection: 'row',
             justifyContent: 'flex-start',
             alignItems: 'center',
+            position: 'relative',
           }}>
           <Image source={pin} style={{marginHorizontal: 5}} />
           <TextInput
@@ -103,55 +196,100 @@ export default class TodosModal extends React.Component {
               paddingLeft: 0,
               paddingVertical: 10,
             }}
+            value={currentTodo.location}
+            onChangeText={txt => {
+              customSetState({currentTodo: {...currentTodo, location: txt}});
+              this.placeFinder(txt);
+            }}
+            onFocus={() => this.setState({showPredictions: true})}
+            onBlur={() => this.setState({showPredictions: false})}
+            editable={isLocationEditable}
           />
         </View>
-        <View style={{marginBottom: 15}}>
-          <Text
+
+        {showPredictions && predictions.length > 0 && (
+          <View
             style={{
-              fontSize: 24,
-              fontWeight: 'bold',
-              color: '#fff',
+              position: 'relative',
+              top: 0,
+              left: 0,
+              backgroundColor: '#fff',
+              borderRadius: 10,
             }}>
-            Complete
-          </Text>
-        </View>
+            {predictions.map((prediction, i) => (
+              <TouchableOpacity
+                key={`prediction-${i}`}
+                style={{
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                  width: width - 40,
+                }}
+                onPress={() => this.placeUpdate(prediction)}>
+                <Text
+                  style={{color: '#000', fontWeight: 'bold', fontSize: 18}}
+                  numberOfLines={1}>
+                  {prediction.primaryText}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+        {isEditing && (
+          <View style={{marginBottom: 15}}>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: 'bold',
+                color: '#fff',
+              }}>
+              Complete
+            </Text>
+          </View>
+        )}
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           <TouchableOpacity
             style={{
-              backgroundColor: '#ffcc00',
+              backgroundColor: isSaveDisabled ? '#ffcc0040' : '#ffcc00',
               paddingHorizontal: 10,
               paddingVertical: 8,
               borderRadius: 5,
-            }}>
+            }}
+            onPress={() =>
+              !isEditing ? addTodos(currentTodo) : updateTodos(currentTodo.id)
+            }
+            disabled={isSaveDisabled}>
             <Text
               style={{
                 fontSize: 24,
                 fontWeight: 'bold',
                 color: '#000',
-                width: 80,
+                width: isEditing ? 80 : width - 60,
                 textAlign: 'center',
               }}>
-              Save
+              {!isEditing ? 'Save' : 'Update'}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#ffcc00',
-              paddingHorizontal: 10,
-              paddingVertical: 8,
-              borderRadius: 5,
-            }}>
-            <Text
+          {isEditing && (
+            <TouchableOpacity
               style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: '#000',
-                width: 80,
-                textAlign: 'center',
-              }}>
-              Delete
-            </Text>
-          </TouchableOpacity>
+                backgroundColor: '#ffcc00',
+                paddingHorizontal: 10,
+                paddingVertical: 8,
+                borderRadius: 5,
+              }}
+              onPress={() => deleteTodos(currentTodo.id)}>
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  color: '#000',
+                  width: 80,
+                  textAlign: 'center',
+                }}>
+                Delete
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     );

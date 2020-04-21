@@ -1,16 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-  Dimensions,
-} from 'react-native';
+import {Text, View, ScrollView, Animated, Dimensions} from 'react-native';
 import TopBlob from '../components/topBlob';
 import TodosModal from '../components/todosModal';
 import NavBar from '../components/navBar';
+import TodosList from '../components/todosList';
 
 const {Value} = Animated;
 const {height, width} = Dimensions.get('window');
@@ -34,14 +28,21 @@ export default class DashScreen extends React.Component {
     this.setState({fade: !this.state.fade}, () => {
       Animated.timing(this.buttonOpacity, {
         toValue: !this.state.fade ? 1 : 0,
-        duration: 500,
+        duration: 300,
         useNativeDriver: true,
       }).start();
     });
   };
 
   render() {
-    const {states} = this.props;
+    const {
+      states,
+      customSetState,
+      addTodos,
+      updateTodos,
+      deleteTodos,
+      handleEditTodos,
+    } = this.props;
     const {assets, user, todos} = states;
     const {blob2} = assets;
     const {info} = user;
@@ -49,7 +50,7 @@ export default class DashScreen extends React.Component {
     return (
       <View style={{flex: 1}}>
         <TopBlob blob={blob2} />
-        <Animated.ScrollView>
+        <ScrollView>
           <View style={{padding: 20, flex: 1}}>
             <View
               style={{
@@ -66,7 +67,7 @@ export default class DashScreen extends React.Component {
                   Welcome {info.user.givenName}
                 </Text>
                 <Text style={{fontSize: 20, color: '#0000009a'}}>
-                  {todos.length > 0
+                  {todos.length === 0
                     ? 'Click (+) and add todos.'
                     : `You have ${todos.length} todos pending.`}
                 </Text>
@@ -126,42 +127,13 @@ export default class DashScreen extends React.Component {
                 Complete
               </Text>
             </View>
-            <View
-              style={{
-                position: 'relative',
-                zIndex: 10,
-              }}>
-              {todos &&
-                todos.map((todo, i) => {
-                  return (
-                    <TouchableOpacity
-                      key={`todo-${i}`}
-                      style={{
-                        borderColor: '#00000009',
-                        borderWidth: 1,
-                        borderRadius: 10,
-                        marginBottom: 10,
-                        paddingVertical: 10,
-                        paddingHorizontal: 15,
-                      }}
-                      onPress={() => this.toggleAction()}>
-                      <Text
-                        style={{
-                          fontWeight: 'bold',
-                          fontSize: 24,
-                          marginBottom: 10,
-                        }}>
-                        {todo.title}
-                      </Text>
-                      <Text style={{fontSize: 16, color: '#0000009a'}}>
-                        London
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-            </View>
+            <TodosList
+              states={states}
+              toggleAction={this.toggleAction}
+              handleEditTodos={handleEditTodos}
+            />
           </View>
-        </Animated.ScrollView>
+        </ScrollView>
         <NavBar states={states} toggleAction={this.toggleAction} />
         <Animated.View
           style={{
@@ -179,7 +151,14 @@ export default class DashScreen extends React.Component {
             marginVertical: 5,
             transform: [{translateY: this.buttonY}],
           }}>
-          <TodosModal states={states} toggleAction={this.toggleAction} />
+          <TodosModal
+            states={states}
+            toggleAction={this.toggleAction}
+            customSetState={customSetState}
+            addTodos={addTodos}
+            updateTodos={updateTodos}
+            deleteTodos={deleteTodos}
+          />
         </Animated.View>
       </View>
     );
