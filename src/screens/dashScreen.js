@@ -1,76 +1,76 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {Text, View, Image, TouchableOpacity, ScrollView} from 'react-native';
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  Animated,
+  Dimensions,
+} from 'react-native';
 import TopBlob from '../components/topBlob';
+import TodosModal from '../components/todosModal';
+import NavBar from '../components/navBar';
+
+const {Value} = Animated;
+const {height, width} = Dimensions.get('window');
 
 export default class DashScreen extends React.Component {
+  state = {fade: true, menuVisible: true};
+
   componentDidMount() {
     const {loadTodos} = this.props;
     loadTodos();
   }
 
+  buttonOpacity = new Value(0);
+
+  buttonY = this.buttonOpacity.interpolate({
+    inputRange: [0, 1],
+    outputRange: [height - 200, 0],
+  });
+
+  toggleAction = () => {
+    this.setState({fade: !this.state.fade}, () => {
+      Animated.timing(this.buttonOpacity, {
+        toValue: !this.state.fade ? 1 : 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
   render() {
-    const {state} = this.props;
-    const {assets, user, todos, devInfo} = state;
+    const {states} = this.props;
+    const {assets, user, todos} = states;
     const {blob2} = assets;
-    const {width} = devInfo;
     const {info} = user;
 
     return (
       <View style={{flex: 1}}>
         <TopBlob blob={blob2} />
-        <View
-          style={{
-            width: width,
-            position: 'relative',
-            zIndex: 50,
-            paddingHorizontal: 20,
-            paddingTop: 20,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: 'transparent',
-          }}>
-          <TouchableOpacity style={{position: 'relative', zIndex: 50}}>
-            <View
-              style={{
-                height: 6,
-                width: 35,
-                backgroundColor: '#000',
-                borderRadius: 20,
-                marginBottom: 6,
-              }}
-            />
-            <View
-              style={{
-                height: 6,
-                width: 25,
-                backgroundColor: '#000',
-                borderRadius: 20,
-              }}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={{position: 'relative', zIndex: 50}}>
-            <Image
-              source={{uri: info.user.photo}}
-              style={{height: 48, width: 48, borderRadius: 28}}
-            />
-          </TouchableOpacity>
-        </View>
-        <ScrollView style={{flex: 1}}>
-          <View style={{padding: 20, paddingTop: 68, flex: 1}}>
+        <Animated.ScrollView>
+          <View style={{padding: 20, flex: 1}}>
             <View
               style={{
                 position: 'relative',
                 zIndex: 10,
               }}>
-              <Text
-                style={{fontSize: 32, fontWeight: 'bold', marginVertical: 10}}>
-                Welcome {info.user.givenName}
-              </Text>
-              <Text style={{fontSize: 20, color: '#0000009a'}}>
-                You have 5 todos pending.
-              </Text>
+              <View>
+                <Text
+                  style={{
+                    fontSize: 32,
+                    fontWeight: 'bold',
+                    marginVertical: 10,
+                  }}>
+                  Welcome {info.user.givenName}
+                </Text>
+                <Text style={{fontSize: 20, color: '#0000009a'}}>
+                  {todos.length > 0
+                    ? 'Click (+) and add todos.'
+                    : `You have ${todos.length} todos pending.`}
+                </Text>
+              </View>
             </View>
             <View
               style={{
@@ -143,7 +143,8 @@ export default class DashScreen extends React.Component {
                         marginBottom: 10,
                         paddingVertical: 10,
                         paddingHorizontal: 15,
-                      }}>
+                      }}
+                      onPress={() => this.toggleAction()}>
                       <Text
                         style={{
                           fontWeight: 'bold',
@@ -152,7 +153,7 @@ export default class DashScreen extends React.Component {
                         }}>
                         {todo.title}
                       </Text>
-                      <Text style={{fontSize: 18, color: '#0000009a'}}>
+                      <Text style={{fontSize: 16, color: '#0000009a'}}>
                         London
                       </Text>
                     </TouchableOpacity>
@@ -160,7 +161,26 @@ export default class DashScreen extends React.Component {
                 })}
             </View>
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
+        <NavBar states={states} toggleAction={this.toggleAction} />
+        <Animated.View
+          style={{
+            position: 'absolute',
+            bottom: -5,
+            left: 0,
+            zIndex: 20,
+            width: width,
+            height: height - 200,
+            backgroundColor: '#000000f0',
+            borderTopLeftRadius: 35,
+            borderTopRightRadius: 35,
+            paddingHorizontal: 20,
+            paddingVertical: 15,
+            marginVertical: 5,
+            transform: [{translateY: this.buttonY}],
+          }}>
+          <TodosModal states={states} toggleAction={this.toggleAction} />
+        </Animated.View>
       </View>
     );
   }

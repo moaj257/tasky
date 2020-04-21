@@ -6,6 +6,12 @@ import DashScreen from './screens/dashScreen';
 
 import Blob1 from './assets/images/blob1.png';
 import Blob2 from './assets/images/blob2.png';
+import Plus from './assets/images/plus.png';
+import Pin from './assets/images/pin.png';
+import Text from './assets/images/text.png';
+import Close from './assets/images/close.png';
+import Cancel from './assets/images/cancel.png';
+import Tick from './assets/images/tick.png';
 
 import {WEB_CLIENT_ID} from './utils/keys';
 import {Todos} from './utils/todos';
@@ -17,6 +23,12 @@ export default class App extends React.Component {
     assets: {
       blob1: Blob1,
       blob2: Blob2,
+      plus: Plus,
+      pin: Pin,
+      text: Text,
+      close: Close,
+      cancel: Cancel,
+      tick: Tick,
     },
     devInfo: {
       height: height,
@@ -65,9 +77,9 @@ export default class App extends React.Component {
     const {user} = this.state;
 
     return !user.isLoggedIn ? (
-      <LoginScreen state={this.state} customSetState={this.customSetState} />
+      <LoginScreen states={this.state} customSetState={this.customSetState} />
     ) : (
-      <DashScreen state={this.state} loadTodos={this.loadTodos} />
+      <DashScreen states={this.state} loadTodos={this.loadTodos} />
     );
   }
 }

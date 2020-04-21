@@ -6,8 +6,8 @@ import TopBlob from '../components/topBlob';
 
 export default class LoginScreen extends React.Component {
   configureGoogleSign = () => {
-    const {state} = this.props;
-    const {google} = state;
+    const {states} = this.props;
+    const {google} = states;
     const {clientId} = google;
 
     GoogleSignin.configure({
@@ -17,8 +17,8 @@ export default class LoginScreen extends React.Component {
   };
 
   signIn = async () => {
-    const {customSetState, state} = this.props;
-    const {error, user} = state;
+    const {customSetState, states} = this.props;
+    const {error, user} = states;
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
@@ -44,8 +44,8 @@ export default class LoginScreen extends React.Component {
   };
 
   getCurrentUserInfo = async () => {
-    const {customSetState, state} = this.props;
-    const {user, error} = state;
+    const {customSetState, states} = this.props;
+    const {user, error} = states;
     try {
       const userInfo = await GoogleSignin.signInSilently();
       customSetState({
@@ -53,15 +53,14 @@ export default class LoginScreen extends React.Component {
         error: {...error, user: null},
       });
     } catch (err) {
-      this.configureGoogleSign();
       if (err.code === statusCodes.SIGN_IN_REQUIRED) {
-        Alert.alert('Please Sign in');
+        // Alert.alert('Please Sign in');
         customSetState({
           user: {...user, isLoggedIn: false, info: null},
           error: {...error, user: err},
         });
       } else {
-        Alert.alert('Something else went wrong... ', err.toString());
+        // Alert.alert('Something else went wrong... ', err.toString());
         customSetState({
           user: {...user, isLoggedIn: false, info: null},
           error: {...error, user: err},
@@ -71,12 +70,13 @@ export default class LoginScreen extends React.Component {
   };
 
   componentDidMount() {
+    this.configureGoogleSign();
     this.getCurrentUserInfo();
   }
 
   render() {
-    const {state} = this.props;
-    const {assets, app} = state;
+    const {states} = this.props;
+    const {assets, app} = states;
     const {blob2} = assets;
     const {name, desc} = app;
 
