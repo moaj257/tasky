@@ -20,11 +20,11 @@ export default class TopBlob extends React.Component {
         <Image source={blob} resizeMode={'contain'} />
         <Pulse
           color="orange"
-          numPulses={3}
-          diameter={width}
-          speed={10}
-          duration={2000}
-          style={{position: 'absolute', left: -200, top: 0}}
+          numPulses={5}
+          diameter={width + 200}
+          speed={20}
+          duration={1000}
+          style={{position: 'absolute', left: -200, top: -80}}
         />
       </View>
     );

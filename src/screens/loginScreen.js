@@ -85,57 +85,62 @@ export default class LoginScreen extends React.Component {
 
   render() {
     const {states} = this.props;
-    const {assets, app} = states;
+    const {assets, app, devInfo} = states;
     const {blob2} = assets;
     const {name, desc} = app;
+    const {height} = devInfo;
 
     return (
-      <>
-        <StatusBar barStyle="light-content" />
-        <View style={{position: 'relative', flex: 1, overflow: 'hidden'}}>
-          <TopBlob blob={blob2} />
-          <View style={{flex: 1}} />
-          <View
+      <View
+        style={{
+          position: 'relative',
+          height: height,
+          zIndex: 50,
+          overflow: 'hidden',
+        }}>
+        <TopBlob blob={blob2} />
+        <View style={{height: height / 3 - 30}} />
+        <View
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            padding: 20,
+            justifyContent: 'center',
+            height: (height / 3) * 2 - 30,
+          }}>
+          <Text style={{fontSize: 48, fontWeight: 'bold', marginBottom: 20}}>
+            {name}
+          </Text>
+          <Text
             style={{
-              position: 'relative',
-              zIndex: 10,
-              padding: 20,
-              justifyContent: 'center',
+              fontSize: 24,
+              fontWeight: 'normal',
+              marginBottom: 80,
+              color: '#0000009a',
             }}>
-            <Text style={{fontSize: 48, fontWeight: 'bold', marginBottom: 20}}>
-              {name}
-            </Text>
+            {desc}
+          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#0099ff',
+              padding: 5,
+              width: '100%',
+              alignItems: 'center',
+              borderRadius: 5,
+              paddingVertical: 10,
+            }}
+            onPress={this.signIn}>
             <Text
               style={{
-                fontSize: 24,
-                fontWeight: 'normal',
-                marginBottom: 80,
-                color: '#0000009a',
+                fontSize: 20,
+                fontWeight: 'bold',
+                color: '#fff',
               }}>
-              {desc}
+              Sign In
             </Text>
-            <TouchableOpacity
-              style={{
-                backgroundColor: '#0099ff',
-                padding: 5,
-                width: '100%',
-                alignItems: 'center',
-                borderRadius: 5,
-                paddingVertical: 10,
-              }}
-              onPress={this.signIn}>
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: 'bold',
-                  color: '#fff',
-                }}>
-                Sign In
-              </Text>
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         </View>
-      </>
+      </View>
     );
   }
 }

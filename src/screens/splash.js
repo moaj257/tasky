@@ -12,13 +12,13 @@ export default class Splash extends React.Component {
     return (
       <View
         style={{
-          flex: 1,
           backgroundColor: '#ffaa00',
           justifyContent: 'center',
           alignItems: 'center',
-          position: 'absolute',
+          position: 'relative',
           width: width,
           height: height,
+          zIndex: 100,
           top: 0,
           left: 0,
         }}>

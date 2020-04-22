@@ -98,7 +98,7 @@ def enableSeparateBuildPerCPUArchitecture = false
 /**
  * Run Proguard to shrink the Java bytecode in release builds.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore.
@@ -147,6 +147,12 @@ android {
         }
     }
     signingConfigs {
+        release {
+            storeFile file('tasky.keystore')
+            storePassword 'Moaj@257'
+            keyAlias 'taskyAlias'
+            keyPassword 'Moaj@257'
+        }
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'
@@ -157,13 +163,15 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            // minifyEnabled enableProguardInReleaseBuilds
+            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://facebook.github.io/react-native/docs/signed-apk-android.
             signingConfig signingConfigs.debug
-            minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            // minifyEnabled enableProguardInReleaseBuilds
+            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
 
@@ -199,7 +207,9 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
 
-    compile project(':react-native-google-places')
+    implementation 'com.google.android.gms:play-services-auth:18.0.0'
+
+    implementation project(':react-native-google-places')
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'

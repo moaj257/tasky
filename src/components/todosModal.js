@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import RNGooglePlaces from 'react-native-google-places';
+import CheckBox from '@react-native-community/checkbox';
 
 const {width} = Dimensions.get('window');
 
@@ -37,15 +38,19 @@ export default class TodosModal extends React.Component {
       .catch(error => Alert.alert(error.toString()));
   };
 
-  placeUpdate = prediction => {
-    const {states, customSetState} = this.props;
+  placeUpdate = async prediction => {
+    const {states, customSetState, toggleAction} = this.props;
     const {currentTodo} = states;
     const {placeID, primaryText} = prediction;
     customSetState({
       currentTodo: {...currentTodo, placeId: placeID, location: primaryText},
     });
-    this.setState({showPredictions: false, isLocationEditable: false});
-    RNGooglePlaces.lookUpPlaceByID(placeID, ['location'])
+    this.setState({
+      showPredictions: false,
+      isLocationEditable: false,
+      isSaveDisabled: true,
+    });
+    await RNGooglePlaces.lookUpPlaceByID(placeID, ['location'])
       .then(({location}) => {
         customSetState({
           currentTodo: {
@@ -57,9 +62,9 @@ export default class TodosModal extends React.Component {
       })
       .catch(error => {
         console.log(error.message, 'ERR');
-        this.setState({isLocationEditable: true});
         Alert.alert(error.message.toString());
       });
+    this.setState({isSaveDisabled: false, isLocationEditable: true});
   };
 
   render() {
@@ -235,7 +240,12 @@ export default class TodosModal extends React.Component {
           </View>
         )}
         {isEditing && (
-          <View style={{marginBottom: 15}}>
+          <View
+            style={{
+              marginBottom: 15,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
             <Text
               style={{
                 fontSize: 24,
@@ -244,6 +254,19 @@ export default class TodosModal extends React.Component {
               }}>
               Complete
             </Text>
+            <CheckBox
+              onChange={() =>
+                customSetState({
+                  currentTodo: {
+                    ...this.props.states.currentTodo,
+                    isComplete: !this.props.states.currentTodo.isComplete,
+                  },
+                })
+              }
+              style={{marginTop: 10, marginLeft: 5}}
+              value={currentTodo.isComplete}
+              tintColors={{true: '#ffcc00', false: '#fff'}}
+            />
           </View>
         )}
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -254,9 +277,10 @@ export default class TodosModal extends React.Component {
               paddingVertical: 8,
               borderRadius: 5,
             }}
-            onPress={() =>
-              !isEditing ? addTodos(currentTodo) : updateTodos(currentTodo.id)
-            }
+            onPress={() => {
+              !isEditing ? addTodos(currentTodo) : updateTodos(currentTodo.id);
+              toggleAction();
+            }}
             disabled={isSaveDisabled}>
             <Text
               style={{
@@ -277,7 +301,10 @@ export default class TodosModal extends React.Component {
                 paddingVertical: 8,
                 borderRadius: 5,
               }}
-              onPress={() => deleteTodos(currentTodo.id)}>
+              onPress={() => {
+                deleteTodos(currentTodo.id);
+                toggleAction();
+              }}>
               <Text
                 style={{
                   fontSize: 24,

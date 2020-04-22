@@ -55,6 +55,7 @@ export default class App extends React.Component {
       user: null,
     },
     todos: [],
+    completedTodos: [],
     currentTodo: {
       id: null,
       title: null,
@@ -67,6 +68,7 @@ export default class App extends React.Component {
     },
     isLoaded: false,
     todosLoading: false,
+    completedTodosLoading: false,
     isEditing: false,
   };
 
@@ -74,8 +76,33 @@ export default class App extends React.Component {
     this.setState(stateJSON);
   };
 
+  completeTodos = async () => {
+    this.setState({completedTodosLoading: true});
+    const {user} = this.state;
+    const {info} = user;
+    const refs = Todos();
+    let completedTodos = [];
+    if (refs) {
+      await refs
+        .where('userId', '==', info.user.id)
+        .where('isActive', '==', true)
+        .where('isComplete', '==', true)
+        .orderBy('createdAt', 'asc')
+        .get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            completedTodos = [{...doc.data()}, ...completedTodos];
+          });
+        });
+    }
+
+    this.setState({completedTodos}, () => {
+      this.setState({completedTodosLoading: false});
+    });
+  };
+
   loadTodos = async () => {
-    this.setState({todosLoading: true});
+    this.setState({todosLoading: true, completedTodosLoading: true});
     const {user} = this.state;
     const {info} = user;
     const refs = Todos();
@@ -85,7 +112,7 @@ export default class App extends React.Component {
         .where('userId', '==', info.user.id)
         .where('isActive', '==', true)
         .where('isComplete', '==', false)
-        .orderBy('createdAt', 'desc')
+        .orderBy('createdAt', 'asc')
         .get()
         .then(querySnapshot => {
           querySnapshot.forEach(doc => {
@@ -99,38 +126,112 @@ export default class App extends React.Component {
     });
   };
 
+  generateNewKey = () => {
+    const _ref = Todos().doc();
+    const newKey = _ref.id;
+    return newKey;
+  };
+
   addTodos = async () => {
+    this.setState({todosLoading: true, completedTodosLoading: true});
     const {user, currentTodo} = this.state;
     const {info} = user;
     const refs = Todos();
-    await refs.add({
-      ...currentTodo,
-      userId: info,
-      createdAt: firestore.FieldValue.serverTimestamp(),
-    });
+    await refs
+      .add({
+        ...currentTodo,
+        userId: info.user.id,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      })
+      .then(async refData => {
+        await refs.doc(refData.id).update({
+          ...currentTodo,
+          id: refData.id,
+        });
+        await this.loadTodos();
+        await this.completeTodos();
+        this.setState({
+          todosLoading: false,
+          completedTodosLoading: false,
+          currentTodo: {
+            id: null,
+            title: null,
+            location: null,
+            latitude: null,
+            longitude: null,
+            placeId: null,
+            isActive: true,
+            isComplete: false,
+          },
+        });
+      });
   };
 
   updateTodos = async todoId => {
+    this.setState({todosLoading: true, completedTodosLoading: true});
     const {user, currentTodo} = this.state;
     const {info} = user;
     const refs = Todos();
-    await refs.doc(todoId).update({
-      ...currentTodo,
-      userId: info,
-      updatedAt: firestore.FieldValue.serverTimestamp(),
-    });
+    console.log(todoId);
+    await refs
+      .doc(todoId)
+      .update({
+        ...currentTodo,
+        userId: info.user.id,
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      })
+      .then(async () => {
+        await this.loadTodos();
+        await this.completeTodos();
+
+        this.setState({
+          todosLoading: false,
+          completedTodosLoading: false,
+          currentTodo: {
+            id: null,
+            title: null,
+            location: null,
+            latitude: null,
+            longitude: null,
+            placeId: null,
+            isActive: true,
+            isComplete: false,
+          },
+        });
+      });
   };
 
   deleteTodos = async todoId => {
+    this.setState({todosLoading: true, completedTodosLoading: true});
     const {user, currentTodo} = this.state;
     const {info} = user;
     const refs = Todos();
-    await refs.doc(todoId).update({
-      ...currentTodo,
-      userId: info,
-      isActive: false,
-      updatedAt: firestore.FieldValue.serverTimestamp(),
-    });
+    await refs
+      .doc(todoId)
+      .update({
+        ...currentTodo,
+        userId: info.user.id,
+        isActive: false,
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      })
+      .then(async () => {
+        await this.loadTodos();
+        await this.completeTodos();
+        this.setState({
+          todosLoading: false,
+          completedTodosLoading: false,
+          currentTodo: {
+            id: null,
+            title: null,
+            location: null,
+            latitude: null,
+            longitude: null,
+            placeId: null,
+            isActive: true,
+            isComplete: false,
+          },
+        });
+      });
   };
 
   handleEditTodos = currentTodo => {
@@ -143,12 +244,15 @@ export default class App extends React.Component {
 
   render() {
     const {user, isLoaded} = this.state;
+    
+    console.log(user.isLoggedIn, isLoaded, '__LOADED');
 
     if (user.isLoggedIn && isLoaded) {
       return (
         <DashScreen
           states={this.state}
           loadTodos={this.loadTodos}
+          completeTodos={this.completeTodos}
           customSetState={this.customSetState}
           addTodos={this.addTodos}
           updateTodos={this.updateTodos}
@@ -159,7 +263,7 @@ export default class App extends React.Component {
     }
 
     return (
-      <View>
+      <>
         {!isLoaded && <Splash states={this.state} />}
         {!user.isLoggedIn && (
           <LoginScreen
@@ -167,7 +271,7 @@ export default class App extends React.Component {
             customSetState={this.customSetState}
           />
         )}
-      </View>
+      </>
     );
   }
 }

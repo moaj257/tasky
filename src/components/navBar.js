@@ -4,7 +4,7 @@ import {View, Image, TouchableOpacity} from 'react-native';
 
 export default class NavBar extends React.Component {
   render() {
-    const {states, toggleAction} = this.props;
+    const {states, toggleAction, customSetState} = this.props;
     const {assets} = states;
     const {close} = assets;
 
@@ -27,7 +27,22 @@ export default class NavBar extends React.Component {
             backgroundColor: '#ffcc00',
             borderRadius: 15,
           }}
-          onPress={() => toggleAction()}>
+          onPress={() => {
+            customSetState({
+              isEditing: false,
+              currentTodo: {
+                id: null,
+                title: null,
+                location: null,
+                latitude: null,
+                longitude: null,
+                placeId: null,
+                isActive: true,
+                isComplete: false,
+              },
+            });
+            toggleAction();
+          }}>
           <Image
             source={close}
             style={{
