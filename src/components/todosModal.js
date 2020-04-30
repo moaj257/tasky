@@ -8,8 +8,8 @@ import {
   TextInput,
   Dimensions,
   Alert,
+  ScrollView,
 } from 'react-native';
-import RNGooglePlaces from 'react-native-google-places';
 import CheckBox from '@react-native-community/checkbox';
 
 const {width} = Dimensions.get('window');
@@ -22,49 +22,251 @@ export default class TodosModal extends React.Component {
     mapError: null,
   };
 
-  placeFinder = q => {
-    if (q.length < 2) {
+  placeFinder = async (func, q) => {
+    if (q.length <= 3) {
       return;
     }
-    RNGooglePlaces.getAutocompletePredictions(
-      q,
-      {
-        type: 'geocode',
-        country: 'IN',
+    let predictions = {
+      meta: {code: 200, requestId: '5ea95015211536324b5b8439'},
+      response: {
+        venues: [
+          {
+            id: '5014c4e9e4b097af8abacef9',
+            name: 'Bharathi Park',
+            location: {
+              lat: 11.932934467463282,
+              lng: 79.83429398684618,
+              labeledLatLngs: [
+                {
+                  label: 'display',
+                  lat: 11.932934467463282,
+                  lng: 79.83429398684618,
+                },
+              ],
+              cc: 'IN',
+              country: 'India',
+              formattedAddress: ['India'],
+            },
+            categories: [
+              {
+                id: '4bf58dd8d48988d163941735',
+                name: 'Park',
+                pluralName: 'Parks',
+                shortName: 'Park',
+                icon: {
+                  prefix:
+                    'https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_',
+                  suffix: '.png',
+                },
+                primary: true,
+              },
+            ],
+            referralId: 'v-1588154673',
+            hasPerk: false,
+          },
+          {
+            id: '5c820a4d603d2a002ce459d1',
+            name: 'French Park',
+            location: {
+              address: '83 JN Street\npondicherry',
+              lat: 11.935769,
+              lng: 79.83091,
+              labeledLatLngs: [
+                {label: 'display', lat: 11.935769, lng: 79.83091},
+              ],
+              postalCode: '605001',
+              cc: 'IN',
+              city: 'Puducherry',
+              state: 'Union Territory of Puducherry',
+              country: 'India',
+              formattedAddress: [
+                '83 JN Street',
+                'pondicherry',
+                'Puducherry 605001',
+                'Union Territory of Puducherry',
+                'India',
+              ],
+            },
+            categories: [
+              {
+                id: '4bf58dd8d48988d103951735',
+                name: 'Clothing Store',
+                pluralName: 'Clothing Stores',
+                shortName: 'Apparel',
+                icon: {
+                  prefix:
+                    'https://ss3.4sqi.net/img/categories_v2/shops/apparel_',
+                  suffix: '.png',
+                },
+                primary: true,
+              },
+            ],
+            referralId: 'v-1588154673',
+            hasPerk: false,
+          },
+          {
+            id: '51e402ce498e6f1752d3add3',
+            name: 'Raymond Park Avenue',
+            location: {
+              lat: 11.934395,
+              lng: 79.826774,
+              labeledLatLngs: [
+                {label: 'display', lat: 11.934395, lng: 79.826774},
+              ],
+              cc: 'IN',
+              country: 'India',
+              formattedAddress: ['India'],
+            },
+            categories: [
+              {
+                id: '4bf58dd8d48988d106951735',
+                name: "Men's Store",
+                pluralName: "Men's Stores",
+                shortName: "Men's Store",
+                icon: {
+                  prefix:
+                    'https://ss3.4sqi.net/img/categories_v2/shops/apparel_men_',
+                  suffix: '.png',
+                },
+                primary: true,
+              },
+            ],
+            referralId: 'v-1588154673',
+            hasPerk: false,
+          },
+          {
+            id: '50189effe4b0deb6b21fe553',
+            name: 'Hotel Sun Park',
+            location: {
+              lat: 11.933549510734087,
+              lng: 79.82663492034125,
+              labeledLatLngs: [
+                {
+                  label: 'display',
+                  lat: 11.933549510734087,
+                  lng: 79.82663492034125,
+                },
+              ],
+              cc: 'IN',
+              country: 'India',
+              formattedAddress: ['India'],
+            },
+            categories: [
+              {
+                id: '4bf58dd8d48988d1fa931735',
+                name: 'Hotel',
+                pluralName: 'Hotels',
+                shortName: 'Hotel',
+                icon: {
+                  prefix:
+                    'https://ss3.4sqi.net/img/categories_v2/travel/hotel_',
+                  suffix: '.png',
+                },
+                primary: true,
+              },
+            ],
+            referralId: 'v-1588154673',
+            hasPerk: false,
+          },
+          {
+            id: '5285896411d23c159db20304',
+            name: 'Horti-Park KVK',
+            location: {
+              address: 'Ellaipillaichavady',
+              crossStreet: 'Villupuram Road',
+              lat: 11.930330052442894,
+              lng: 79.82518496957002,
+              labeledLatLngs: [
+                {
+                  label: 'display',
+                  lat: 11.930330052442894,
+                  lng: 79.82518496957002,
+                },
+              ],
+              postalCode: '605005',
+              cc: 'IN',
+              city: 'Puducherry',
+              state: 'Union Territory of Puducherry',
+              country: 'India',
+              formattedAddress: [
+                'Ellaipillaichavady (Villupuram Road)',
+                'Puducherry 605005',
+                'Union Territory of Puducherry',
+                'India',
+              ],
+            },
+            categories: [
+              {
+                id: '4bf58dd8d48988d11b951735',
+                name: 'Flower Shop',
+                pluralName: 'Flower Shops',
+                shortName: 'Flower Shop',
+                icon: {
+                  prefix:
+                    'https://ss3.4sqi.net/img/categories_v2/shops/flowershop_',
+                  suffix: '.png',
+                },
+                primary: true,
+              },
+            ],
+            referralId: 'v-1588154673',
+            hasPerk: false,
+          },
+        ],
+        geocode: {
+          what: '',
+          where: 'pondicherry in',
+          feature: {
+            cc: 'IN',
+            name: 'Puducherry',
+            displayName: 'Puducherry, Union Territory of Puducherry, India',
+            matchedName: 'Pondicherry, Union Territory of Puducherry, IN',
+            highlightedName:
+              '<b>Pondicherry</b>, Union Territory of Puducherry, <b>IN</b>',
+            woeType: 7,
+            slug: 'puducherry-india',
+            id: 'geonameid:1259425',
+            longId: '72057594039187361',
+            geometry: {
+              center: {lat: 11.93381, lng: 79.82979},
+              bounds: {
+                ne: {lat: 11.989259814081308, lng: 79.85232329825784},
+                sw: {lat: 11.78841565732688, lng: 79.75705811820067},
+              },
+            },
+          },
+          parents: [],
+        },
       },
-      ['placeID', 'location', 'name', 'address'],
-    )
-      .then(results => this.setState({predictions: results}))
-      .catch(error => Alert.alert(error.toString()));
+    };
+
+    // let predictions = await func(q);
+    if (predictions && predictions.response && predictions.response.venues) {
+      this.setState({predictions: predictions.response.venues});
+    } else {
+      Alert.alert(predictions.toString());
+    }
   };
 
   placeUpdate = async prediction => {
-    const {states, customSetState, toggleAction} = this.props;
+    const {states, customSetState} = this.props;
     const {currentTodo} = states;
-    const {placeID, primaryText} = prediction;
+    const {id, name, location} = prediction;
+    const {lat, lng} = location;
     customSetState({
-      currentTodo: {...currentTodo, placeId: placeID, location: primaryText},
+      currentTodo: {
+        ...currentTodo,
+        placeId: id,
+        place: name,
+        lat: lat.toString(),
+        lng: lng.toString(),
+      },
     });
     this.setState({
       showPredictions: false,
-      isLocationEditable: false,
-      isSaveDisabled: true,
+      isLocationEditable: true,
+      isSaveDisabled: false,
     });
-    await RNGooglePlaces.lookUpPlaceByID(placeID, ['location'])
-      .then(({location}) => {
-        customSetState({
-          currentTodo: {
-            ...this.props.states.currentTodo,
-            latitude: location.latitude,
-            longitude: location.longitude,
-          },
-        });
-      })
-      .catch(error => {
-        console.log(error.message, 'ERR');
-        Alert.alert(error.message.toString());
-      });
-    this.setState({isSaveDisabled: false, isLocationEditable: true});
   };
 
   render() {
@@ -76,19 +278,84 @@ export default class TodosModal extends React.Component {
       addTodos,
       updateTodos,
       deleteTodos,
+      getPredictions,
     } = this.props;
-    const {assets, currentTodo, isEditing} = states;
-    const {pin, text, close} = assets;
+    const {assets, currentTodo, isEditing, isLocations, locations} = states;
+    const {pin, text, close, blob1} = assets;
+
+    if (isLocations) {
+      return (
+        <ScrollView>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+            }}>
+            <Text
+              style={{
+                fontSize: 36,
+                fontWeight: 'bold',
+                marginBottom: 10,
+                color: '#fff',
+                flex: 1,
+              }}>
+              Locations
+            </Text>
+            <TouchableOpacity
+              style={{
+                padding: 15,
+                backgroundColor: '#ffcc00',
+                borderRadius: 30,
+              }}
+              onPress={() => {
+                customSetState({isLocations: false});
+                toggleAction();
+              }}>
+              <Image source={close} style={{height: 16, width: 16}} />
+            </TouchableOpacity>
+          </View>
+          <View style={{marginTop: 5}}>
+            {locations && locations.length === 0 && (
+              <Text style={{color: '#fff'}}>No Locations available</Text>
+            )}
+            {locations &&
+              locations.length > 0 &&
+              locations.map(({lat, lng, created_at}, i) => (
+                <View key={`location-${i}`}>
+                  <View>
+                    <Text style={{color: '#fff'}}>Latitude</Text>
+                    <Text style={{color: '#fff'}}>{lat}</Text>
+                  </View>
+                  <View>
+                    <Text style={{color: '#fff'}}>Longitude</Text>
+                    <Text style={{color: '#fff'}}>{lng}</Text>
+                  </View>
+                  <View>
+                    <Text style={{color: '#fff'}}>Date</Text>
+                    <Text style={{color: '#fff'}}>{created_at}</Text>
+                  </View>
+                </View>
+              ))}
+          </View>
+        </ScrollView>
+      );
+    }
 
     let isSaveDisabled = true;
     if (
+      currentTodo.title !== undefined &&
       currentTodo.title !== null &&
       currentTodo.title.length > 0 &&
-      currentTodo.location !== null &&
-      currentTodo.location.length > 0 &&
-      currentTodo.latitude !== null &&
-      currentTodo.longitude !== null &&
-      currentTodo.placeID !== null
+      currentTodo.place !== undefined &&
+      currentTodo.place !== null &&
+      currentTodo.place.length > 0 &&
+      currentTodo.lat !== undefined &&
+      currentTodo.lat !== null &&
+      currentTodo.lng !== undefined &&
+      currentTodo.lng !== null &&
+      currentTodo.placeId !== undefined &&
+      currentTodo.placeId !== null
     ) {
       if (isEditing) {
         if (currentTodo.id !== null) {
@@ -102,7 +369,18 @@ export default class TodosModal extends React.Component {
     }
 
     return (
-      <View>
+      <View style={{position: 'relative'}}>
+        <Image
+          source={blob1}
+          style={{
+            height: 128,
+            width: 128,
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            opacity: 0.5,
+          }}
+        />
         <View
           style={{
             flexDirection: 'row',
@@ -201,16 +479,38 @@ export default class TodosModal extends React.Component {
               paddingLeft: 0,
               paddingVertical: 10,
             }}
-            value={currentTodo.location}
+            value={currentTodo.place}
             onChangeText={txt => {
-              customSetState({currentTodo: {...currentTodo, location: txt}});
-              this.placeFinder(txt);
+              customSetState({currentTodo: {...currentTodo, place: txt}});
+              this.placeFinder(getPredictions, txt);
             }}
             onFocus={() => this.setState({showPredictions: true})}
             onBlur={() => this.setState({showPredictions: false})}
             editable={isLocationEditable}
           />
         </View>
+
+        {showPredictions && predictions.length === 0 && (
+          <View
+            style={{
+              position: 'relative',
+              top: 0,
+              left: 0,
+              backgroundColor: '#fff',
+              borderRadius: 10,
+            }}>
+            <View
+              style={{
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                width: width - 40,
+              }}>
+              <Text style={{color: '#000', fontWeight: 'bold', fontSize: 18}}>
+                Loading...
+              </Text>
+            </View>
+          </View>
+        )}
 
         {showPredictions && predictions.length > 0 && (
           <View
@@ -233,7 +533,7 @@ export default class TodosModal extends React.Component {
                 <Text
                   style={{color: '#000', fontWeight: 'bold', fontSize: 18}}
                   numberOfLines={1}>
-                  {prediction.primaryText}
+                  {prediction.name}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -258,13 +558,13 @@ export default class TodosModal extends React.Component {
               onChange={() =>
                 customSetState({
                   currentTodo: {
-                    ...this.props.states.currentTodo,
-                    isComplete: !this.props.states.currentTodo.isComplete,
+                    ...currentTodo,
+                    is_complete: !currentTodo.is_complete,
                   },
                 })
               }
               style={{marginTop: 10, marginLeft: 5}}
-              value={currentTodo.isComplete}
+              value={currentTodo.is_complete}
               tintColors={{true: '#ffcc00', false: '#fff'}}
             />
           </View>

@@ -7,7 +7,7 @@ export default class TodosList extends React.Component {
   render() {
     const {
       states,
-      isActive,
+      is_active,
       toggleAction,
       handleEditTodos,
       customSetState,
@@ -26,29 +26,30 @@ export default class TodosList extends React.Component {
         style={{
           width: width - 40,
         }}>
-        {isActive && todos.length === 0 && todosLoading && (
+        {is_active && todosLoading && (
           <Text style={{fontSize: 18, color: '#00000085'}}>
             Loading todos...
           </Text>
         )}
-        {isActive && todos.length === 0 && !todosLoading && (
+        {is_active && todos.length === 0 && !todosLoading && (
           <Text style={{fontSize: 18, color: '#00000085'}}>
             No todos found.
           </Text>
         )}
 
-        {!isActive && completedTodos.length === 0 && completedTodosLoading && (
+        {!is_active && completedTodosLoading && (
           <Text style={{fontSize: 18, color: '#00000085'}}>
             Loading completed todos...
           </Text>
         )}
-        {!isActive && completedTodos.length === 0 && !completedTodosLoading && (
+        {!is_active && completedTodos.length === 0 && !completedTodosLoading && (
           <Text style={{fontSize: 18, color: '#00000085'}}>
             No completed todos found.
           </Text>
         )}
 
-        {isActive &&
+        {!todosLoading &&
+          is_active &&
           todos &&
           todos.map((todo, i) => {
             return (
@@ -56,7 +57,7 @@ export default class TodosList extends React.Component {
                 key={`todo-${i}`}
                 states={states}
                 todo={todo}
-                isActive={isActive}
+                is_active={is_active}
                 toggleAction={toggleAction}
                 handleEditTodos={handleEditTodos}
                 customSetState={customSetState}
@@ -64,7 +65,8 @@ export default class TodosList extends React.Component {
             );
           })}
 
-        {!isActive &&
+        {!completedTodosLoading &&
+          !is_active &&
           completedTodos &&
           completedTodos.map((completedTodo, i) => {
             return (
@@ -72,7 +74,7 @@ export default class TodosList extends React.Component {
                 key={`todo-${i}`}
                 states={states}
                 todo={completedTodo}
-                isActive={isActive}
+                is_active={is_active}
                 toggleAction={toggleAction}
                 handleEditTodos={handleEditTodos}
                 customSetState={customSetState}

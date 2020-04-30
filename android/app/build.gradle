@@ -2,6 +2,8 @@ apply plugin: "com.android.application"
 
 apply plugin: 'com.google.gms.google-services'
 
+apply plugin: 'kotlin-android'
+
 import com.android.build.OutputFile
 
 /**
@@ -98,7 +100,7 @@ def enableSeparateBuildPerCPUArchitecture = false
 /**
  * Run Proguard to shrink the Java bytecode in release builds.
  */
-def enableProguardInReleaseBuilds = true
+def enableProguardInReleaseBuilds = false
 
 /**
  * The preferred build flavor of JavaScriptCore.
@@ -170,8 +172,8 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://facebook.github.io/react-native/docs/signed-apk-android.
             signingConfig signingConfigs.debug
-            // minifyEnabled enableProguardInReleaseBuilds
-            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
 
@@ -208,6 +210,14 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
 
     implementation 'com.google.android.gms:play-services-auth:18.0.0'
+
+    implementation "com.google.android.gms:play-services-location:+"
+
+    implementation "com.google.code.gson:gson:+"
+
+    implementation "com.android.support:multidex:1.0.3"
+
+    implementation project(':watermelondb')
 
     implementation project(':react-native-google-places')
 

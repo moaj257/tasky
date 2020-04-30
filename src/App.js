@@ -1,7 +1,12 @@
 import React from 'react';
-import {Dimensions, View} from 'react-native';
+import {
+  Dimensions,
+  AppState,
+  DeviceEventEmitter,
+  NativeModules,
+} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
-import firestore from '@react-native-firebase/firestore';
+import {Q} from '@nozbe/watermelondb';
 
 import LoginScreen from './screens/loginScreen';
 import DashScreen from './screens/dashScreen';
@@ -18,11 +23,35 @@ import Tick from './assets/images/tick.png';
 import Logo from './assets/images/logo.png';
 
 import {WEB_CLIENT_ID} from './utils/keys';
-import {Todos} from './utils/todos';
+import {getDistanceFromLatLonInKm, uuid} from './utils/functions';
+import {withLocationPermissions} from './utils/withLocationPermissions';
+import {database} from './database';
 
 const {height, width} = Dimensions.get('window');
 
-export default class App extends React.Component {
+// const getLocation = async () => {
+//   await GetLocation.getCurrentPosition({
+//     enableHighAccuracy: true,
+//     timeout: 15000,
+//   })
+//     .then(location => {
+//       console.log(location, '__!!@@__LOC__');
+//       let distance = getDistanceFromLatLonInKm(
+//         location.latitude,
+//         location.longitude,
+//         11.8919026,
+//         79.810501,
+//       );
+//       console.log(distance, '__DISTANCE__');
+//     })
+//     .catch(error => {
+//       const {code, message} = error;
+//       console.warn(code, message, '__!!@@__LOC__ERR__');
+//     });
+// };
+
+class AppClass extends React.Component {
+  timeInterval = null;
   state = {
     assets: {
       blob1: Blob1,
@@ -60,204 +89,291 @@ export default class App extends React.Component {
       id: null,
       title: null,
       location: null,
-      latitude: null,
-      longitude: null,
+      place: null,
+      lng: null,
+      lat: null,
       placeId: null,
-      isActive: true,
-      isComplete: false,
+      is_active: true,
+      is_complete: false,
     },
     isLoaded: false,
     todosLoading: false,
     completedTodosLoading: false,
     isEditing: false,
+    appState: AppState.currentState,
+    lat: null,
+    lng: null,
+    locations: [],
+    isLocations: false,
   };
 
   customSetState = stateJSON => {
     this.setState(stateJSON);
   };
 
-  completeTodos = async () => {
-    this.setState({completedTodosLoading: true});
+  getAllLocations = async () => {
     const {user} = this.state;
     const {info} = user;
-    const refs = Todos();
-    let completedTodos = [];
-    if (refs) {
-      await refs
-        .where('userId', '==', info.user.id)
-        .where('isActive', '==', true)
-        .where('isComplete', '==', true)
-        .orderBy('createdAt', 'asc')
-        .get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            completedTodos = [{...doc.data()}, ...completedTodos];
-          });
-        });
-    }
+    let locations = await database.collections
+      .get('locations')
+      .query(Q.where('userId', info.user.id))
+      .fetch();
 
-    this.setState({completedTodos}, () => {
-      this.setState({completedTodosLoading: false});
-    });
+    console.log(locations, '_:LPCO');
+    this.setState({locations});
   };
 
   loadTodos = async () => {
     this.setState({todosLoading: true, completedTodosLoading: true});
     const {user} = this.state;
     const {info} = user;
-    const refs = Todos();
     let todos = [];
-    if (refs) {
-      await refs
-        .where('userId', '==', info.user.id)
-        .where('isActive', '==', true)
-        .where('isComplete', '==', false)
-        .orderBy('createdAt', 'asc')
-        .get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            todos = [{...doc.data()}, ...todos];
-          });
-        });
-    }
+    let activeTodos = [];
+    let completedTodos = [];
 
-    this.setState({todos}, () => {
-      this.setState({todosLoading: false});
+    todos = await database.collections
+      .get('todos')
+      .query(Q.where('is_active', true), Q.where('userId', info.user.id))
+      .fetch();
+
+    await todos.map(async todo => {
+      if (todo.is_complete === true) {
+        completedTodos = [
+          {...todo.getTodo(), id: todo._raw.id},
+          ...completedTodos,
+        ];
+      } else {
+        activeTodos = [{...todo.getTodo(), id: todo._raw.id}, ...activeTodos];
+      }
     });
-  };
 
-  generateNewKey = () => {
-    const _ref = Todos().doc();
-    const newKey = _ref.id;
-    return newKey;
+    this.setState({todos: activeTodos, completedTodos: completedTodos}, () => {
+      this.setState({todosLoading: false, completedTodosLoading: false});
+    });
   };
 
   addTodos = async () => {
     this.setState({todosLoading: true, completedTodosLoading: true});
     const {user, currentTodo} = this.state;
     const {info} = user;
-    const refs = Todos();
-    await refs
-      .add({
-        ...currentTodo,
-        userId: info.user.id,
-        createdAt: firestore.FieldValue.serverTimestamp(),
-      })
-      .then(async refData => {
-        await refs.doc(refData.id).update({
-          ...currentTodo,
-          id: refData.id,
-        });
-        await this.loadTodos();
-        await this.completeTodos();
-        this.setState({
-          todosLoading: false,
-          completedTodosLoading: false,
-          currentTodo: {
-            id: null,
-            title: null,
-            location: null,
-            latitude: null,
-            longitude: null,
-            placeId: null,
-            isActive: true,
-            isComplete: false,
-          },
-        });
+    await database.action(async () => {
+      await database.collections.get('todos').create(todo => {
+        todo.uuid = uuid();
+        todo.title = currentTodo.title;
+        todo.place = currentTodo.place;
+        todo.is_complete = false;
+        todo.is_active = true;
+        todo.lat = currentTodo.lat;
+        todo.lng = currentTodo.lng;
+        todo.placeId = currentTodo.placeId;
+        todo.userId = info.user.id;
+        todo.created_at = new Date().getTime();
+        todo.updated_at = new Date().getTime();
       });
+    });
+    await this.loadTodos();
+    this.setState({
+      todosLoading: false,
+      completedTodosLoading: false,
+      currentTodo: {
+        id: null,
+        title: null,
+        place: null,
+        lat: null,
+        lng: null,
+        placeId: null,
+        is_active: true,
+        is_complete: false,
+      },
+    });
   };
 
   updateTodos = async todoId => {
     this.setState({todosLoading: true, completedTodosLoading: true});
-    const {user, currentTodo} = this.state;
+    let {user, currentTodo} = this.state;
     const {info} = user;
-    const refs = Todos();
-    console.log(todoId);
-    await refs
-      .doc(todoId)
-      .update({
-        ...currentTodo,
-        userId: info.user.id,
-        updatedAt: firestore.FieldValue.serverTimestamp(),
-      })
-      .then(async () => {
-        await this.loadTodos();
-        await this.completeTodos();
-
-        this.setState({
-          todosLoading: false,
-          completedTodosLoading: false,
-          currentTodo: {
-            id: null,
-            title: null,
-            location: null,
-            latitude: null,
-            longitude: null,
-            placeId: null,
-            isActive: true,
-            isComplete: false,
-          },
-        });
+    await database.action(async () => {
+      let todosCollection = await database.collections.get('todos');
+      let cTodo = await todosCollection.find(todoId);
+      await cTodo.update(todo => {
+        todo.title = currentTodo.title;
+        todo.place = currentTodo.place;
+        todo.is_complete = currentTodo.is_complete;
+        todo.is_active = true;
+        todo.lat = currentTodo.lat;
+        todo.lng = currentTodo.lng;
+        todo.placeId = currentTodo.placeId;
+        todo.userId = info.user.id;
+        todo.updated_at = new Date().getTime();
       });
+    });
+    await this.loadTodos();
+    this.setState({
+      todosLoading: false,
+      completedTodosLoading: false,
+      currentTodo: {
+        id: null,
+        title: null,
+        place: null,
+        lat: null,
+        lng: null,
+        placeId: null,
+        is_active: true,
+        is_complete: false,
+      },
+    });
   };
 
   deleteTodos = async todoId => {
     this.setState({todosLoading: true, completedTodosLoading: true});
     const {user, currentTodo} = this.state;
     const {info} = user;
-    const refs = Todos();
-    await refs
-      .doc(todoId)
-      .update({
-        ...currentTodo,
-        userId: info.user.id,
-        isActive: false,
-        updatedAt: firestore.FieldValue.serverTimestamp(),
-      })
-      .then(async () => {
-        await this.loadTodos();
-        await this.completeTodos();
-        this.setState({
-          todosLoading: false,
-          completedTodosLoading: false,
-          currentTodo: {
-            id: null,
-            title: null,
-            location: null,
-            latitude: null,
-            longitude: null,
-            placeId: null,
-            isActive: true,
-            isComplete: false,
-          },
-        });
+
+    await database.action(async () => {
+      let todosCollection = await database.collections.get('todos');
+      let cTodo = await todosCollection.find(todoId);
+      await cTodo.update(todo => {
+        todo.title = currentTodo.title;
+        todo.place = currentTodo.place;
+        todo.is_complete = currentTodo.is_complete;
+        todo.is_active = false;
+        todo.lat = currentTodo.lat;
+        todo.lng = currentTodo.lng;
+        todo.placeId = currentTodo.placeId;
+        todo.userId = info.user.id;
+        todo.updated_at = new Date(currentTodo.created_at).getTime();
+        todo.updated_at = new Date().getTime();
       });
+    });
+
+    await this.loadTodos();
+    this.setState({
+      todosLoading: false,
+      completedTodosLoading: false,
+      currentTodo: {
+        id: null,
+        title: null,
+        place: null,
+        lat: null,
+        lng: null,
+        placeId: null,
+        is_active: true,
+        is_complete: false,
+      },
+    });
+  };
+
+  addLocations = async cLocation => {
+    const {user} = this.state;
+    const {info} = user;
+    await database.action(async () => {
+      await database.collections.get('locations').create(location => {
+        location.uuid = uuid();
+        location.lat = cLocation.lat;
+        location.lng = cLocation.lng;
+        location.userId = info.user.id;
+        location.is_active = true;
+        location.created_at = new Date().getTime();
+        location.updated_at = new Date().getTime();
+      });
+    });
+    console.log('added location');
+  };
+
+  getPredictions = async q => {
+    const client_id = 'IBDIYLRSISDOZ3M3MQZ4REKOM13VKPWIP0PMYI51Q0DX3PZX';
+    const client_secret = 'WHKDE1VSLE2053ENPN0HY0OH0CVGHTL5G3B1LTIKSEM5IXND';
+    return await fetch(
+      `https://api.foursquare.com/v2/venues/search?query=${q}&near=Pondicherry,%20IN&limit=5&v=20200429&client_id=${client_id}&client_secret=${client_secret}`,
+    )
+      .then(res => res.json())
+      .catch(err => err.json());
   };
 
   handleEditTodos = currentTodo => {
-    this.setState({currentTodo});
+    this.setState({currentTodo: currentTodo});
+  };
+
+  onEnableLocationPress = async () => {
+    const {locationPermissionGranted, requestLocationPermission} = this.props;
+    if (!locationPermissionGranted) {
+      const granted = await requestLocationPermission();
+      if (granted) {
+        return NativeModules.LocationManager.startBackgroundLocation();
+      }
+    }
+    NativeModules.LocationManager.startBackgroundLocation();
+  };
+
+  onCancelLocationPress = () => {
+    NativeModules.LocationManager.stopBackgroundLocation();
+  };
+
+  checkLocationUpdates = async nextState => {
+    const {lat, lng} = this.state;
+    if (lat !== nextState.latitude || lng !== nextState.longitude) {
+      let distance = getDistanceFromLatLonInKm(
+        nextState.latitude,
+        nextState.longitude,
+        lat !== null ? lat : nextState.latitude,
+        lng !== null ? lng : nextState.longitude,
+      );
+      this.setState({lat: nextState.latitude, lng: nextState.longitude});
+      if (distance > 0.5) {
+        await this.addLocations({
+          latitude: lat,
+          longitude: lng,
+        });
+        console.log(
+          lat,
+          lng,
+          nextState.latitude,
+          nextState.longitude,
+          distance,
+          '__!!##__EDU',
+        );
+        console.log('locations changed');
+      }
+    }
   };
 
   componentDidMount() {
     SplashScreen.hide();
+    this.subscription = DeviceEventEmitter.addListener(
+      NativeModules.LocationManager.JS_LOCATION_EVENT_NAME,
+      e => {
+        this.checkLocationUpdates(e);
+      },
+    );
+    this.onEnableLocationPress();
+  }
+
+  // componentWillUpdate(nextState) {
+  //   const {lat, lng} = this.state;
+  //   if (lat !== nextState.lat || lng !== nextState.lng) {
+  //     this.checkLocationUpdates(nextState);
+  //   }
+  // }
+
+  componentWillUnmount() {
+    this.subscription.remove();
   }
 
   render() {
     const {user, isLoaded} = this.state;
-    
-    console.log(user.isLoggedIn, isLoaded, '__LOADED');
 
     if (user.isLoggedIn && isLoaded) {
       return (
         <DashScreen
           states={this.state}
           loadTodos={this.loadTodos}
-          completeTodos={this.completeTodos}
           customSetState={this.customSetState}
           addTodos={this.addTodos}
           updateTodos={this.updateTodos}
           deleteTodos={this.deleteTodos}
           handleEditTodos={this.handleEditTodos}
+          getPredictions={this.getPredictions}
+          getAllLocations={this.getAllLocations}
         />
       );
     }
@@ -275,3 +391,7 @@ export default class App extends React.Component {
     );
   }
 }
+
+const App = withLocationPermissions(AppClass);
+
+export default App;

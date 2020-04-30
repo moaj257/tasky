@@ -21,9 +21,9 @@ export default class DashScreen extends React.Component {
   state = {fade: true, active: true};
 
   componentDidMount() {
-    const {loadTodos, completeTodos} = this.props;
+    const {loadTodos, getAllLocations} = this.props;
     loadTodos();
-    completeTodos();
+    getAllLocations();
   }
 
   buttonOpacity = new Value(0);
@@ -86,6 +86,8 @@ export default class DashScreen extends React.Component {
       updateTodos,
       deleteTodos,
       handleEditTodos,
+      getPredictions,
+      getAllLocations,
     } = this.props;
     const {assets, user, todos, completedTodos} = states;
     const {blob2} = assets;
@@ -211,7 +213,7 @@ export default class DashScreen extends React.Component {
               {active ? (
                 <TodosList
                   states={states}
-                  isActive={true}
+                  is_active={true}
                   customSetState={customSetState}
                   toggleAction={this.toggleAction}
                   handleEditTodos={handleEditTodos}
@@ -219,7 +221,7 @@ export default class DashScreen extends React.Component {
               ) : (
                 <TodosList
                   states={states}
-                  isActive={false}
+                  is_active={false}
                   customSetState={customSetState}
                   toggleAction={this.toggleAction}
                   handleEditTodos={handleEditTodos}
@@ -232,10 +234,12 @@ export default class DashScreen extends React.Component {
           states={states}
           toggleAction={this.toggleAction}
           customSetState={customSetState}
+          getAllLocations={getAllLocations}
         />
         <Animated.View
           style={{
             position: 'absolute',
+            overflow: 'hidden',
             bottom: -5,
             left: 0,
             zIndex: 20,
@@ -251,6 +255,7 @@ export default class DashScreen extends React.Component {
           }}>
           <TodosModal
             states={states}
+            getPredictions={getPredictions}
             toggleAction={this.toggleAction}
             customSetState={customSetState}
             addTodos={addTodos}

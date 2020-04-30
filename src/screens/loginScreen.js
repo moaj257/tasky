@@ -1,8 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {View, Text, StatusBar, TouchableOpacity, Alert} from 'react-native';
+import {View, Text, TouchableOpacity} from 'react-native';
 import {GoogleSignin, statusCodes} from '@react-native-community/google-signin';
+import {Q} from '@nozbe/watermelondb';
 import TopBlob from '../components/topBlob';
+import {database} from '../database';
+import {uuid} from '../utils/functions';
 
 export default class LoginScreen extends React.Component {
   configureGoogleSign = () => {
@@ -26,6 +29,7 @@ export default class LoginScreen extends React.Component {
         user: {...user, isLoggedIn: true, info: userInfo},
         error: {...error, user: null},
       });
+      this.checkSave(userInfo);
     } catch (err) {
       // if (err.code === statusCodes.SIGN_IN_CANCELLED) {
       //   Alert.alert('Process Cancelled');
@@ -52,6 +56,7 @@ export default class LoginScreen extends React.Component {
         user: {...user, isLoggedIn: true, info: userInfo},
         error: {...error, user: null},
       });
+      this.checkSave(userInfo);
     } catch (err) {
       if (err.code === statusCodes.SIGN_IN_REQUIRED) {
         // Alert.alert('Please Sign in');
@@ -76,6 +81,26 @@ export default class LoginScreen extends React.Component {
         customSetState({isLoaded: true});
       }, 3000);
     });
+  };
+
+  checkSave = async userInfo => {
+    let userCollection = await database.collections.get('users');
+    let users = await userCollection
+      .query(Q.where('is_active', true), Q.where('_gid', userInfo.user.id))
+      .fetch();
+    if (users.length === 0) {
+      await database.action(async () => {
+        await userCollection.create(user => {
+          user.uuid = uuid();
+          user._gid = userInfo.user.id;
+          user.name = userInfo.user.givenName;
+          user.photo = userInfo.user.photo;
+          user.is_active = true;
+          user.created_at = new Date().toISOString();
+          user.updated_at = new Date().toISOString();
+        });
+      });
+    }
   };
 
   componentDidMount() {

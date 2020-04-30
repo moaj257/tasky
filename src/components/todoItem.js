@@ -10,10 +10,10 @@ export default class TodoItem extends React.Component {
       handleEditTodos,
       customSetState,
       states,
-      isActive,
+      // is_active,
     } = this.props;
     const {assets} = states;
-    const {tick, cancel, pin} = assets;
+    const {blob2, blob1, pin} = assets;
     // const {todos} = states;
     return (
       <TouchableOpacity
@@ -47,19 +47,20 @@ export default class TodoItem extends React.Component {
           <Text
             style={{fontSize: 16, color: '#0000009a', marginLeft: 5, flex: 1}}
             numberOfLines={1}>
-            {todo.location}
+            {todo.place}
           </Text>
         </View>
         <View
           style={{
             position: 'absolute',
-            bottom: -20,
-            right: -20,
-            opacity: isActive ? 0.05 : 0.15,
+            bottom: -35,
+            left: -40,
+            opacity: 0.5,
+            zIndex: -1,
           }}>
           <Image
-            source={todo.isComplete ? tick : cancel}
-            style={{height: 96, width: 96}}
+            source={todo.is_complete ? blob1 : blob2}
+            style={{height: 128, width: 128}}
           />
         </View>
       </TouchableOpacity>

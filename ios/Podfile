@@ -89,6 +89,10 @@ target 'tasky' do
 
   pod 'react-native-checkbox', :path => '../node_modules/@react-native-community/checkbox'
 
+
+
+  pod 'react-native-sqlite-storage', :path => '../node_modules/react-native-sqlite-storage'
+
   target 'taskyTests' do
     inherit! :complete
     # Pods for testing
