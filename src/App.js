@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import {Q} from '@nozbe/watermelondb';
+import {Notifications} from 'react-native-notifications';
 
 import LoginScreen from './screens/loginScreen';
 import DashScreen from './screens/dashScreen';
@@ -266,17 +267,27 @@ class AppClass extends React.Component {
   addLocations = async cLocation => {
     const {user} = this.state;
     const {info} = user;
+    let cLocationData = {
+      ...cLocation,
+      uuid: uuid(),
+      userId: info.user.id,
+      is_active: true,
+      created_at: new Date().getTime(),
+      updated_at: new Date().getTime(),
+    };
     await database.action(async () => {
       await database.collections.get('locations').create(location => {
-        location.uuid = uuid();
-        location.lat = cLocation.lat;
-        location.lng = cLocation.lng;
-        location.userId = info.user.id;
-        location.is_active = true;
-        location.created_at = new Date().getTime();
-        location.updated_at = new Date().getTime();
+        location.uuid = cLocationData.uuid;
+        location.lat = cLocationData.lat;
+        location.lng = cLocationData.lng;
+        location.userId = cLocationData.userId;
+        location.is_active = cLocationData.is_active;
+        location.created_at = cLocationData.created_at;
+        location.updated_at = cLocationData.updated_at;
       });
     });
+    this.setState({locations: [cLocationData, ...this.state.locations]});
+    // this.getAllLocations();
     console.log('added location');
   };
 
@@ -310,30 +321,33 @@ class AppClass extends React.Component {
   };
 
   checkLocationUpdates = async nextState => {
-    const {lat, lng} = this.state;
-    if (lat !== nextState.latitude || lng !== nextState.longitude) {
-      let distance = getDistanceFromLatLonInKm(
-        nextState.latitude,
-        nextState.longitude,
-        lat !== null ? lat : nextState.latitude,
-        lng !== null ? lng : nextState.longitude,
-      );
-      this.setState({lat: nextState.latitude, lng: nextState.longitude});
-      if (distance > 0.5) {
-        await this.addLocations({
-          latitude: lat,
-          longitude: lng,
-        });
-        console.log(
-          lat,
-          lng,
+    const {lat, lng, todos} = this.state;
+    if (
+      todos.length > 0 &&
+      (lat !== nextState.latitude || lng !== nextState.longitude)
+    ) {
+      todos.map(async todo => {
+        let distance = getDistanceFromLatLonInKm(
           nextState.latitude,
           nextState.longitude,
-          distance,
-          '__!!##__EDU',
+          todo.lat,
+          todo.lng,
         );
-        console.log('locations changed');
-      }
+        this.setState({lat: nextState.latitude, lng: nextState.longitude});
+        if (distance <= 0.5) {
+          Notifications.postLocalNotification({
+            body: `${todo.title} at ${todo.place}`,
+            title: 'Hey there!',
+            silent: false,
+            category: 'TASKY_LOCATION_NEAR_BY',
+            payload: todo,
+          });
+          await this.addLocations({
+            lat: this.state.lat,
+            lng: this.state.lng,
+          });
+        }
+      });
     }
   };
 
@@ -347,13 +361,6 @@ class AppClass extends React.Component {
     );
     this.onEnableLocationPress();
   }
-
-  // componentWillUpdate(nextState) {
-  //   const {lat, lng} = this.state;
-  //   if (lat !== nextState.lat || lng !== nextState.lng) {
-  //     this.checkLocationUpdates(nextState);
-  //   }
-  // }
 
   componentWillUnmount() {
     this.subscription.remove();

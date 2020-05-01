@@ -19,9 +19,12 @@ import androidx.core.app.NotificationCompat;
 import com.google.gson.Gson;
 import com.tasky.MainActivity;
 
+import java.util.Date;
+import java.util.Locale;
+
 public class LocationForegroundService extends Service implements LocationEventReceiver {
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
-    public static final int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = (int) (new Date().getTime()/1000);
     public static final String LOCATION_EVENT_NAME = "com.tasky.LOCATION_INFO";
     public static final String LOCATION_EVENT_DATA_NAME = "LocationData";
     public static final int LOCATION_UPDATE_INTERVAL = 60000;
@@ -114,6 +117,8 @@ public class LocationForegroundService extends Service implements LocationEventR
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Tasky")
+                .setContentText("Fetching locations in background.")
                 .setContentIntent(pendingIntent)
                 .build();
     }

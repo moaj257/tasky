@@ -219,8 +219,6 @@ dependencies {
 
     implementation project(':watermelondb')
 
-    implementation project(':react-native-google-places')
-
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
     }

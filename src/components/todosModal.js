@@ -1,6 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
+  Keyboard,
   View,
   TouchableOpacity,
   Image,
@@ -26,221 +27,221 @@ export default class TodosModal extends React.Component {
     if (q.length <= 3) {
       return;
     }
-    let predictions = {
-      meta: {code: 200, requestId: '5ea95015211536324b5b8439'},
-      response: {
-        venues: [
-          {
-            id: '5014c4e9e4b097af8abacef9',
-            name: 'Bharathi Park',
-            location: {
-              lat: 11.932934467463282,
-              lng: 79.83429398684618,
-              labeledLatLngs: [
-                {
-                  label: 'display',
-                  lat: 11.932934467463282,
-                  lng: 79.83429398684618,
-                },
-              ],
-              cc: 'IN',
-              country: 'India',
-              formattedAddress: ['India'],
-            },
-            categories: [
-              {
-                id: '4bf58dd8d48988d163941735',
-                name: 'Park',
-                pluralName: 'Parks',
-                shortName: 'Park',
-                icon: {
-                  prefix:
-                    'https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_',
-                  suffix: '.png',
-                },
-                primary: true,
-              },
-            ],
-            referralId: 'v-1588154673',
-            hasPerk: false,
-          },
-          {
-            id: '5c820a4d603d2a002ce459d1',
-            name: 'French Park',
-            location: {
-              address: '83 JN Street\npondicherry',
-              lat: 11.935769,
-              lng: 79.83091,
-              labeledLatLngs: [
-                {label: 'display', lat: 11.935769, lng: 79.83091},
-              ],
-              postalCode: '605001',
-              cc: 'IN',
-              city: 'Puducherry',
-              state: 'Union Territory of Puducherry',
-              country: 'India',
-              formattedAddress: [
-                '83 JN Street',
-                'pondicherry',
-                'Puducherry 605001',
-                'Union Territory of Puducherry',
-                'India',
-              ],
-            },
-            categories: [
-              {
-                id: '4bf58dd8d48988d103951735',
-                name: 'Clothing Store',
-                pluralName: 'Clothing Stores',
-                shortName: 'Apparel',
-                icon: {
-                  prefix:
-                    'https://ss3.4sqi.net/img/categories_v2/shops/apparel_',
-                  suffix: '.png',
-                },
-                primary: true,
-              },
-            ],
-            referralId: 'v-1588154673',
-            hasPerk: false,
-          },
-          {
-            id: '51e402ce498e6f1752d3add3',
-            name: 'Raymond Park Avenue',
-            location: {
-              lat: 11.934395,
-              lng: 79.826774,
-              labeledLatLngs: [
-                {label: 'display', lat: 11.934395, lng: 79.826774},
-              ],
-              cc: 'IN',
-              country: 'India',
-              formattedAddress: ['India'],
-            },
-            categories: [
-              {
-                id: '4bf58dd8d48988d106951735',
-                name: "Men's Store",
-                pluralName: "Men's Stores",
-                shortName: "Men's Store",
-                icon: {
-                  prefix:
-                    'https://ss3.4sqi.net/img/categories_v2/shops/apparel_men_',
-                  suffix: '.png',
-                },
-                primary: true,
-              },
-            ],
-            referralId: 'v-1588154673',
-            hasPerk: false,
-          },
-          {
-            id: '50189effe4b0deb6b21fe553',
-            name: 'Hotel Sun Park',
-            location: {
-              lat: 11.933549510734087,
-              lng: 79.82663492034125,
-              labeledLatLngs: [
-                {
-                  label: 'display',
-                  lat: 11.933549510734087,
-                  lng: 79.82663492034125,
-                },
-              ],
-              cc: 'IN',
-              country: 'India',
-              formattedAddress: ['India'],
-            },
-            categories: [
-              {
-                id: '4bf58dd8d48988d1fa931735',
-                name: 'Hotel',
-                pluralName: 'Hotels',
-                shortName: 'Hotel',
-                icon: {
-                  prefix:
-                    'https://ss3.4sqi.net/img/categories_v2/travel/hotel_',
-                  suffix: '.png',
-                },
-                primary: true,
-              },
-            ],
-            referralId: 'v-1588154673',
-            hasPerk: false,
-          },
-          {
-            id: '5285896411d23c159db20304',
-            name: 'Horti-Park KVK',
-            location: {
-              address: 'Ellaipillaichavady',
-              crossStreet: 'Villupuram Road',
-              lat: 11.930330052442894,
-              lng: 79.82518496957002,
-              labeledLatLngs: [
-                {
-                  label: 'display',
-                  lat: 11.930330052442894,
-                  lng: 79.82518496957002,
-                },
-              ],
-              postalCode: '605005',
-              cc: 'IN',
-              city: 'Puducherry',
-              state: 'Union Territory of Puducherry',
-              country: 'India',
-              formattedAddress: [
-                'Ellaipillaichavady (Villupuram Road)',
-                'Puducherry 605005',
-                'Union Territory of Puducherry',
-                'India',
-              ],
-            },
-            categories: [
-              {
-                id: '4bf58dd8d48988d11b951735',
-                name: 'Flower Shop',
-                pluralName: 'Flower Shops',
-                shortName: 'Flower Shop',
-                icon: {
-                  prefix:
-                    'https://ss3.4sqi.net/img/categories_v2/shops/flowershop_',
-                  suffix: '.png',
-                },
-                primary: true,
-              },
-            ],
-            referralId: 'v-1588154673',
-            hasPerk: false,
-          },
-        ],
-        geocode: {
-          what: '',
-          where: 'pondicherry in',
-          feature: {
-            cc: 'IN',
-            name: 'Puducherry',
-            displayName: 'Puducherry, Union Territory of Puducherry, India',
-            matchedName: 'Pondicherry, Union Territory of Puducherry, IN',
-            highlightedName:
-              '<b>Pondicherry</b>, Union Territory of Puducherry, <b>IN</b>',
-            woeType: 7,
-            slug: 'puducherry-india',
-            id: 'geonameid:1259425',
-            longId: '72057594039187361',
-            geometry: {
-              center: {lat: 11.93381, lng: 79.82979},
-              bounds: {
-                ne: {lat: 11.989259814081308, lng: 79.85232329825784},
-                sw: {lat: 11.78841565732688, lng: 79.75705811820067},
-              },
-            },
-          },
-          parents: [],
-        },
-      },
-    };
+    // let predictions = {
+    //   meta: {code: 200, requestId: '5ea95015211536324b5b8439'},
+    //   response: {
+    //     venues: [
+    //       {
+    //         id: '5014c4e9e4b097af8abacef9',
+    //         name: 'Bharathi Park',
+    //         location: {
+    //           lat: 11.932934467463282,
+    //           lng: 79.83429398684618,
+    //           labeledLatLngs: [
+    //             {
+    //               label: 'display',
+    //               lat: 11.932934467463282,
+    //               lng: 79.83429398684618,
+    //             },
+    //           ],
+    //           cc: 'IN',
+    //           country: 'India',
+    //           formattedAddress: ['India'],
+    //         },
+    //         categories: [
+    //           {
+    //             id: '4bf58dd8d48988d163941735',
+    //             name: 'Park',
+    //             pluralName: 'Parks',
+    //             shortName: 'Park',
+    //             icon: {
+    //               prefix:
+    //                 'https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_',
+    //               suffix: '.png',
+    //             },
+    //             primary: true,
+    //           },
+    //         ],
+    //         referralId: 'v-1588154673',
+    //         hasPerk: false,
+    //       },
+    //       {
+    //         id: '5c820a4d603d2a002ce459d1',
+    //         name: 'French Park',
+    //         location: {
+    //           address: '83 JN Street\npondicherry',
+    //           lat: 11.935769,
+    //           lng: 79.83091,
+    //           labeledLatLngs: [
+    //             {label: 'display', lat: 11.935769, lng: 79.83091},
+    //           ],
+    //           postalCode: '605001',
+    //           cc: 'IN',
+    //           city: 'Puducherry',
+    //           state: 'Union Territory of Puducherry',
+    //           country: 'India',
+    //           formattedAddress: [
+    //             '83 JN Street',
+    //             'pondicherry',
+    //             'Puducherry 605001',
+    //             'Union Territory of Puducherry',
+    //             'India',
+    //           ],
+    //         },
+    //         categories: [
+    //           {
+    //             id: '4bf58dd8d48988d103951735',
+    //             name: 'Clothing Store',
+    //             pluralName: 'Clothing Stores',
+    //             shortName: 'Apparel',
+    //             icon: {
+    //               prefix:
+    //                 'https://ss3.4sqi.net/img/categories_v2/shops/apparel_',
+    //               suffix: '.png',
+    //             },
+    //             primary: true,
+    //           },
+    //         ],
+    //         referralId: 'v-1588154673',
+    //         hasPerk: false,
+    //       },
+    //       {
+    //         id: '51e402ce498e6f1752d3add3',
+    //         name: 'Raymond Park Avenue',
+    //         location: {
+    //           lat: 11.934395,
+    //           lng: 79.826774,
+    //           labeledLatLngs: [
+    //             {label: 'display', lat: 11.934395, lng: 79.826774},
+    //           ],
+    //           cc: 'IN',
+    //           country: 'India',
+    //           formattedAddress: ['India'],
+    //         },
+    //         categories: [
+    //           {
+    //             id: '4bf58dd8d48988d106951735',
+    //             name: "Men's Store",
+    //             pluralName: "Men's Stores",
+    //             shortName: "Men's Store",
+    //             icon: {
+    //               prefix:
+    //                 'https://ss3.4sqi.net/img/categories_v2/shops/apparel_men_',
+    //               suffix: '.png',
+    //             },
+    //             primary: true,
+    //           },
+    //         ],
+    //         referralId: 'v-1588154673',
+    //         hasPerk: false,
+    //       },
+    //       {
+    //         id: '50189effe4b0deb6b21fe553',
+    //         name: 'Hotel Sun Park',
+    //         location: {
+    //           lat: 11.933549510734087,
+    //           lng: 79.82663492034125,
+    //           labeledLatLngs: [
+    //             {
+    //               label: 'display',
+    //               lat: 11.933549510734087,
+    //               lng: 79.82663492034125,
+    //             },
+    //           ],
+    //           cc: 'IN',
+    //           country: 'India',
+    //           formattedAddress: ['India'],
+    //         },
+    //         categories: [
+    //           {
+    //             id: '4bf58dd8d48988d1fa931735',
+    //             name: 'Hotel',
+    //             pluralName: 'Hotels',
+    //             shortName: 'Hotel',
+    //             icon: {
+    //               prefix:
+    //                 'https://ss3.4sqi.net/img/categories_v2/travel/hotel_',
+    //               suffix: '.png',
+    //             },
+    //             primary: true,
+    //           },
+    //         ],
+    //         referralId: 'v-1588154673',
+    //         hasPerk: false,
+    //       },
+    //       {
+    //         id: '5285896411d23c159db20304',
+    //         name: 'Horti-Park KVK',
+    //         location: {
+    //           address: 'Ellaipillaichavady',
+    //           crossStreet: 'Villupuram Road',
+    //           lat: 11.930330052442894,
+    //           lng: 79.82518496957002,
+    //           labeledLatLngs: [
+    //             {
+    //               label: 'display',
+    //               lat: 11.930330052442894,
+    //               lng: 79.82518496957002,
+    //             },
+    //           ],
+    //           postalCode: '605005',
+    //           cc: 'IN',
+    //           city: 'Puducherry',
+    //           state: 'Union Territory of Puducherry',
+    //           country: 'India',
+    //           formattedAddress: [
+    //             'Ellaipillaichavady (Villupuram Road)',
+    //             'Puducherry 605005',
+    //             'Union Territory of Puducherry',
+    //             'India',
+    //           ],
+    //         },
+    //         categories: [
+    //           {
+    //             id: '4bf58dd8d48988d11b951735',
+    //             name: 'Flower Shop',
+    //             pluralName: 'Flower Shops',
+    //             shortName: 'Flower Shop',
+    //             icon: {
+    //               prefix:
+    //                 'https://ss3.4sqi.net/img/categories_v2/shops/flowershop_',
+    //               suffix: '.png',
+    //             },
+    //             primary: true,
+    //           },
+    //         ],
+    //         referralId: 'v-1588154673',
+    //         hasPerk: false,
+    //       },
+    //     ],
+    //     geocode: {
+    //       what: '',
+    //       where: 'pondicherry in',
+    //       feature: {
+    //         cc: 'IN',
+    //         name: 'Puducherry',
+    //         displayName: 'Puducherry, Union Territory of Puducherry, India',
+    //         matchedName: 'Pondicherry, Union Territory of Puducherry, IN',
+    //         highlightedName:
+    //           '<b>Pondicherry</b>, Union Territory of Puducherry, <b>IN</b>',
+    //         woeType: 7,
+    //         slug: 'puducherry-india',
+    //         id: 'geonameid:1259425',
+    //         longId: '72057594039187361',
+    //         geometry: {
+    //           center: {lat: 11.93381, lng: 79.82979},
+    //           bounds: {
+    //             ne: {lat: 11.989259814081308, lng: 79.85232329825784},
+    //             sw: {lat: 11.78841565732688, lng: 79.75705811820067},
+    //           },
+    //         },
+    //       },
+    //       parents: [],
+    //     },
+    //   },
+    // };
 
-    // let predictions = await func(q);
+    let predictions = await func(q);
     if (predictions && predictions.response && predictions.response.venues) {
       this.setState({predictions: predictions.response.venues});
     } else {
@@ -285,7 +286,7 @@ export default class TodosModal extends React.Component {
 
     if (isLocations) {
       return (
-        <ScrollView>
+        <View>
           <View
             style={{
               flexDirection: 'row',
@@ -315,30 +316,61 @@ export default class TodosModal extends React.Component {
               <Image source={close} style={{height: 16, width: 16}} />
             </TouchableOpacity>
           </View>
-          <View style={{marginTop: 5}}>
+          <ScrollView style={{marginTop: 5}}>
             {locations && locations.length === 0 && (
               <Text style={{color: '#fff'}}>No Locations available</Text>
             )}
             {locations &&
               locations.length > 0 &&
-              locations.map(({lat, lng, created_at}, i) => (
-                <View key={`location-${i}`}>
-                  <View>
+              locations.map((location, i) => (
+                <View
+                  key={`location-${i}`}
+                  style={{
+                    backgroundColor: '#ffffff20',
+                    padding: 10,
+                    borderRadius: 5,
+                    marginBottom: locations.length - 1 === i ? 55 : 10,
+                  }}>
+                  <View
+                    style={{
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      marginBottom: 2,
+                    }}>
                     <Text style={{color: '#fff'}}>Latitude</Text>
-                    <Text style={{color: '#fff'}}>{lat}</Text>
+                    <Text style={{color: '#fff'}}>{location.lat}</Text>
                   </View>
-                  <View>
+                  <View
+                    style={{
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      marginBottom: 2,
+                    }}>
                     <Text style={{color: '#fff'}}>Longitude</Text>
-                    <Text style={{color: '#fff'}}>{lng}</Text>
+                    <Text style={{color: '#fff'}}>{location.lng}</Text>
                   </View>
-                  <View>
+                  <View
+                    style={{
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      marginBottom: 2,
+                    }}>
                     <Text style={{color: '#fff'}}>Date</Text>
-                    <Text style={{color: '#fff'}}>{created_at}</Text>
+                    <Text style={{color: '#fff'}}>
+                      {`${new Date(
+                        location.created_at,
+                      ).toLocaleDateString()} ${new Date(
+                        location.created_at,
+                      ).toLocaleTimeString()}`}
+                    </Text>
                   </View>
                 </View>
               ))}
-          </View>
-        </ScrollView>
+          </ScrollView>
+        </View>
       );
     }
 
@@ -403,7 +435,10 @@ export default class TodosModal extends React.Component {
               backgroundColor: '#ffcc00',
               borderRadius: 30,
             }}
-            onPress={() => toggleAction()}>
+            onPress={() => {
+              Keyboard.dismiss();
+              toggleAction();
+            }}>
             <Image source={close} style={{height: 16, width: 16}} />
           </TouchableOpacity>
         </View>
@@ -578,6 +613,7 @@ export default class TodosModal extends React.Component {
               borderRadius: 5,
             }}
             onPress={() => {
+              Keyboard.dismiss();
               !isEditing ? addTodos(currentTodo) : updateTodos(currentTodo.id);
               toggleAction();
             }}
@@ -602,6 +638,7 @@ export default class TodosModal extends React.Component {
                 borderRadius: 5,
               }}
               onPress={() => {
+                Keyboard.dismiss();
                 deleteTodos(currentTodo.id);
                 toggleAction();
               }}>
