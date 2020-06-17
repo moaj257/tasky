@@ -22,6 +22,8 @@ export const mySchema = appSchema({
         {name: 'place', type: 'string'},
         {name: 'is_complete', type: 'boolean', isIndexed: true},
         {name: 'is_active', type: 'boolean', isIndexed: true},
+        {name: 'is_birthday', type: 'boolean', isIndexed: true},
+        {name: 'reminder_date_time_at', type: 'number'},
         {name: 'lat', type: 'string'},
         {name: 'lng', type: 'string'},
         {name: 'placeId', type: 'string'},
@@ -59,7 +61,7 @@ export const mySchema = appSchema({
       name: 'places',
       columns: [
         {name: 'uuid', type: 'string'},
-        {name: 'name', type: 'sting', isIndexed: true},
+        {name: 'name', type: 'string', isIndexed: true},
         {name: 'lat', type: 'string'},
         {name: 'lng', type: 'string'},
         {name: 'is_active', type: 'boolean', isIndexed: true},

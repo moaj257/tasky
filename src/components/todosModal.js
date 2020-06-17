@@ -9,9 +9,12 @@ import {
   TextInput,
   Dimensions,
   Alert,
+  Switch,
   ScrollView,
+  Platform
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const {width} = Dimensions.get('window');
 
@@ -21,6 +24,10 @@ export default class TodosModal extends React.Component {
     showPredictions: false,
     isLocationEditable: true,
     mapError: null,
+    mode: null,
+    showModel: false,
+    date: null,
+    time: null
   };
 
   placeFinder = async (func, q) => {
@@ -270,8 +277,14 @@ export default class TodosModal extends React.Component {
     });
   };
 
+  onChangeTime = (event, selectedData) => {
+    const {mode} = this.state;
+    const currentData = selectedData || mode === 'date' ? date : time;
+    this.setState({showModel: Platform.OS === 'ios', [mode]: currentData, mode: mode === 'date' ? 'time': 'date'});
+  }
+
   render() {
-    const {predictions, showPredictions, isLocationEditable} = this.state;
+    const {predictions, showPredictions, isLocationEditable, time, date, showModel, mode} = this.state;
     const {
       states,
       toggleAction,
@@ -282,7 +295,7 @@ export default class TodosModal extends React.Component {
       getPredictions,
     } = this.props;
     const {assets, currentTodo, isEditing, isLocations, locations} = states;
-    const {pin, text, close, blob1} = assets;
+    const {pin, calendar, text, close, blob1} = assets;
 
     if (isLocations) {
       return (
@@ -419,16 +432,38 @@ export default class TodosModal extends React.Component {
             alignItems: 'center',
             justifyContent: 'flex-start',
           }}>
-          <Text
-            style={{
-              fontSize: 36,
-              fontWeight: 'bold',
-              marginBottom: 10,
-              color: '#fff',
-              flex: 1,
-            }}>
-            {isEditing ? 'Update' : 'Add'} Todo
-          </Text>
+          <View style={{flex: 1}}>
+            <Text
+              style={{
+                fontSize: 36,
+                fontWeight: 'bold',
+                marginBottom: 0,
+                color: '#fff',
+              }}>
+              {isEditing ? 'Update' : 'Add'} Todo
+            </Text>
+            <View
+              style={{
+                marginBottom: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: '#ffffff75',
+                }}>
+                Birthday Reminder
+              </Text>
+              <Switch
+                trackColor={{ false: "#ffffff75", true: "#b36b00" }}
+                thumbColor={"#ff9900"}
+                onValueChange={ () => customSetState({currentTodo: {...currentTodo, is_birthday: !currentTodo.is_birthday}}) }
+                value={currentTodo.is_birthday}
+              />
+            </View>
+          </View>
           <TouchableOpacity
             style={{
               padding: 15,
@@ -449,7 +484,7 @@ export default class TodosModal extends React.Component {
             marginBottom: 5,
             color: '#fff',
           }}>
-          Title
+          {currentTodo.is_birthday ? `Name` : `Title`}
         </Text>
         <View
           style={{
@@ -466,7 +501,7 @@ export default class TodosModal extends React.Component {
             style={{marginHorizontal: 5, width: 28, height: 28}}
           />
           <TextInput
-            placeholder="Green Peas"
+            placeholder={currentTodo.is_birthday ? `John Doe` : `Green Peas`}
             placeholderTextColor="#ffcc0040"
             style={{
               flex: 1,
@@ -489,7 +524,7 @@ export default class TodosModal extends React.Component {
             marginBottom: 5,
             color: '#fff',
           }}>
-          Location
+          {currentTodo.is_birthday ? `Date & Time` : `Location`}
         </Text>
         <View
           style={{
@@ -502,27 +537,33 @@ export default class TodosModal extends React.Component {
             alignItems: 'center',
             position: 'relative',
           }}>
-          <Image source={pin} style={{marginHorizontal: 5}} />
-          <TextInput
-            placeholder="Market"
-            placeholderTextColor="#ffcc0040"
-            style={{
-              flex: 1,
-              fontSize: 18,
-              color: '#ffcc00',
-              paddingHorizontal: 5,
-              paddingLeft: 0,
-              paddingVertical: 10,
-            }}
-            value={currentTodo.place}
-            onChangeText={txt => {
-              customSetState({currentTodo: {...currentTodo, place: txt}});
-              this.placeFinder(getPredictions, txt);
-            }}
-            onFocus={() => this.setState({showPredictions: true})}
-            onBlur={() => this.setState({showPredictions: false})}
-            editable={isLocationEditable}
-          />
+          <Image source={currentTodo.is_birthday ? calendar : pin} style={{marginHorizontal: 5}} />
+          {currentTodo.is_birthday ? 
+            (<TextInput
+              placeholder="Select Date & Time"
+              placeholderTextColor="#ffcc0040"
+              value={currentTodo.reminder_date_time_at}
+              onFocus={() => this.setState({mode: 'date', showModel: true})} />) : 
+            (<TextInput
+              placeholder="Market"
+              placeholderTextColor="#ffcc0040"
+              style={{
+                flex: 1,
+                fontSize: 18,
+                color: '#ffcc00',
+                paddingHorizontal: 5,
+                paddingLeft: 0,
+                paddingVertical: 10,
+              }}
+              value={currentTodo.place}
+              onChangeText={txt => {
+                customSetState({currentTodo: {...currentTodo, place: txt}});
+                this.placeFinder(getPredictions, txt);
+              }}
+              onFocus={() => this.setState({showPredictions: true})}
+              onBlur={() => this.setState({showPredictions: false})}
+              editable={isLocationEditable}
+            />)}
         </View>
 
         {showPredictions && predictions.length === 0 && (
@@ -655,6 +696,9 @@ export default class TodosModal extends React.Component {
             </TouchableOpacity>
           )}
         </View>
+        {showModel && (
+          <DateTimePicker mode={mode} value={mode === 'date' ? date : time} is24Hour={true} display="default" onChange={this.onChangeTime} />
+        )}
       </View>
     );
   }

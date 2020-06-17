@@ -22,6 +22,7 @@ import Close from './assets/images/close.png';
 import Cancel from './assets/images/cancel.png';
 import Tick from './assets/images/tick.png';
 import Logo from './assets/images/logo.png';
+import Calendar from './assets/images/calendar.png';
 
 import {WEB_CLIENT_ID} from './utils/keys';
 import {getDistanceFromLatLonInKm, uuid} from './utils/functions';
@@ -43,6 +44,7 @@ class AppClass extends React.Component {
       cancel: Cancel,
       tick: Tick,
       logo: Logo,
+      calendar: Calendar,
     },
     devInfo: {
       height: height,
@@ -72,6 +74,8 @@ class AppClass extends React.Component {
       place: null,
       lng: null,
       lat: null,
+      is_birthday: false,
+      reminder_date_time_at: null,
       placeId: null,
       is_active: true,
       is_complete: false,
@@ -145,6 +149,8 @@ class AppClass extends React.Component {
         todo.is_active = true;
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
+        todo.is_birthday = currentTodo.is_birthday;
+        todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.placeId = currentTodo.placeId;
         todo.userId = info.user.id;
         todo.created_at = new Date().getTime();
@@ -161,6 +167,8 @@ class AppClass extends React.Component {
         place: null,
         lat: null,
         lng: null,
+        is_birthday: false,
+        reminder_date_time_at: null,
         placeId: null,
         is_active: true,
         is_complete: false,
@@ -180,6 +188,8 @@ class AppClass extends React.Component {
         todo.place = currentTodo.place;
         todo.is_complete = currentTodo.is_complete;
         todo.is_active = true;
+        todo.is_birthday = currentTodo.is_birthday;
+        todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
         todo.placeId = currentTodo.placeId;
@@ -197,6 +207,8 @@ class AppClass extends React.Component {
         place: null,
         lat: null,
         lng: null,
+        is_birthday: false,
+        reminder_date_time_at: null,
         placeId: null,
         is_active: true,
         is_complete: false,
@@ -217,6 +229,8 @@ class AppClass extends React.Component {
         todo.place = currentTodo.place;
         todo.is_complete = currentTodo.is_complete;
         todo.is_active = false;
+        todo.is_birthday = currentTodo.is_birthday;
+        todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
         todo.placeId = currentTodo.placeId;
@@ -238,6 +252,8 @@ class AppClass extends React.Component {
         lng: null,
         placeId: null,
         is_active: true,
+        is_birthday: false,
+        reminder_date_time_at: null,
         is_complete: false,
       },
     });
