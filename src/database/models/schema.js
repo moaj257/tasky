@@ -55,5 +55,17 @@ export const mySchema = appSchema({
         {name: 'updated_at', type: 'number'},
       ],
     }),
+    tableSchema({
+      name: 'places',
+      columns: [
+        {name: 'uuid', type: 'string'},
+        {name: 'name', type: 'sting', isIndexed: true},
+        {name: 'lat', type: 'string'},
+        {name: 'lng', type: 'string'},
+        {name: 'is_active', type: 'boolean', isIndexed: true},
+        {name: 'created_at', type: 'number', isIndexed: true},
+        {name: 'updated_at', type: 'number'},
+      ],
+    }),
   ],
 });

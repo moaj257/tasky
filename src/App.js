@@ -30,27 +30,6 @@ import {database} from './database';
 
 const {height, width} = Dimensions.get('window');
 
-// const getLocation = async () => {
-//   await GetLocation.getCurrentPosition({
-//     enableHighAccuracy: true,
-//     timeout: 15000,
-//   })
-//     .then(location => {
-//       console.log(location, '__!!@@__LOC__');
-//       let distance = getDistanceFromLatLonInKm(
-//         location.latitude,
-//         location.longitude,
-//         11.8919026,
-//         79.810501,
-//       );
-//       console.log(distance, '__DISTANCE__');
-//     })
-//     .catch(error => {
-//       const {code, message} = error;
-//       console.warn(code, message, '__!!@@__LOC__ERR__');
-//     });
-// };
-
 class AppClass extends React.Component {
   timeInterval = null;
   state = {
@@ -297,7 +276,20 @@ class AppClass extends React.Component {
     return await fetch(
       `https://api.foursquare.com/v2/venues/search?query=${q}&near=Pondicherry,%20IN&limit=5&v=20200429&client_id=${client_id}&client_secret=${client_secret}`,
     )
-      .then(res => res.json())
+      .then(async res => {
+        let placesArr = [];
+        let places = await database.collections
+          .get('places')
+          .query(Q.where('is_active', true), Q.where('name', Q.like(`${q}`)))
+          .fetch();
+        places.map(place => {
+          placesArr = [...placesArr, {...place, location: {lat: place.lat, lng: place.lng}}];
+        });
+
+        let resp = res.json();
+        resp = {...resp, response: {...resp.response, venues: [...resp.response.venues, ...placesArr]}};
+        return resp;
+      })
       .catch(err => err.json());
   };
 
@@ -350,8 +342,23 @@ class AppClass extends React.Component {
       });
     }
   };
+  
+  addPlaces = async (placeData) => {
+    await database.action(async () => {
+      await database.collections.get('places').create(place => {
+        place.uuid = uuid();
+        place.name = placeData.name;
+        place.lat = placeData.lat;
+        place.lng = placeData.lng;
+        place.is_active = true;
+        place.created_at = new Date().getTime();
+        place.updated_at = new Date().getTime();
+      });
+    });
+  }
 
   componentDidMount() {
+    // this.addPlaces({name: '', lat: '', lng: ''})
     SplashScreen.hide();
     this.subscription = DeviceEventEmitter.addListener(
       NativeModules.LocationManager.JS_LOCATION_EVENT_NAME,
