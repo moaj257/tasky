@@ -26,8 +26,8 @@ export default class TodosModal extends React.Component {
     mapError: null,
     mode: null,
     showModel: false,
-    date: null,
-    time: null
+    sdate: new Date(),
+    time: new Date()
   };
 
   placeFinder = async (func, q) => {
@@ -277,14 +277,19 @@ export default class TodosModal extends React.Component {
     });
   };
 
-  onChangeTime = (event, selectedData) => {
-    const {mode} = this.state;
-    const currentData = selectedData || mode === 'date' ? date : time;
-    this.setState({showModel: Platform.OS === 'ios', [mode]: currentData, mode: mode === 'date' ? 'time': 'date'});
+  onChangeTime = (key, selectedData) => {
+    const currentData = selectedData;
+    const {customSetState} = this.props;
+    const {currentTodo} = this.props;
+    const _this = this;
+    this.setState({showModel: false, [key]: currentData}, (res) => {
+      console.log(res, 'res');
+      customSetState({currentTodo: {...currentTodo, reminder_date_time_at: new Date(`${_this.state.sdate.toISOString().slice(0,10)} ${_this.state.time.toTimeString().slice(0, 5)}`), is_birthday: true}});
+    });
   }
 
   render() {
-    const {predictions, showPredictions, isLocationEditable, time, date, showModel, mode} = this.state;
+    const {predictions, showPredictions, isLocationEditable, time, sdate, showModel, mode} = this.state;
     const {
       states,
       toggleAction,
@@ -296,6 +301,7 @@ export default class TodosModal extends React.Component {
     } = this.props;
     const {assets, currentTodo, isEditing, isLocations, locations} = states;
     const {pin, calendar, text, close, blob1} = assets;
+    console.log(currentTodo.reminder_date_time_at, 'reminder_date_time_at');
 
     if (isLocations) {
       return (
@@ -391,24 +397,38 @@ export default class TodosModal extends React.Component {
     if (
       currentTodo.title !== undefined &&
       currentTodo.title !== null &&
-      currentTodo.title.length > 0 &&
-      currentTodo.place !== undefined &&
-      currentTodo.place !== null &&
-      currentTodo.place.length > 0 &&
-      currentTodo.lat !== undefined &&
-      currentTodo.lat !== null &&
-      currentTodo.lng !== undefined &&
-      currentTodo.lng !== null &&
-      currentTodo.placeId !== undefined &&
-      currentTodo.placeId !== null
+      currentTodo.title.length > 0
     ) {
-      if (isEditing) {
-        if (currentTodo.id !== null) {
-          isSaveDisabled = false;
+      if(currentTodo.is_birthday && sdate !== undefined && sdate !== null && time !== undefined && time !== null){
+        if (isEditing) {
+          if (currentTodo.id !== null) {
+            isSaveDisabled = false;
+          } else {
+            isSaveDisabled = true;
+          }
         } else {
-          isSaveDisabled = true;
+          isSaveDisabled = false;
         }
-      } else {
+      }else if(
+        currentTodo.place !== undefined &&
+        currentTodo.place !== null &&
+        currentTodo.place.length > 0 &&
+        currentTodo.lat !== undefined &&
+        currentTodo.lat !== null &&
+        currentTodo.lng !== undefined &&
+        currentTodo.lng !== null &&
+        currentTodo.placeId !== undefined &&
+        currentTodo.placeId !== null){
+          if (isEditing) {
+            if (currentTodo.id !== null) {
+              isSaveDisabled = false;
+            } else {
+              isSaveDisabled = true;
+            }
+          } else {
+            isSaveDisabled = false;
+          }
+      }else{
         isSaveDisabled = false;
       }
     }
@@ -517,53 +537,104 @@ export default class TodosModal extends React.Component {
             }
           />
         </View>
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: 'bold',
-            marginBottom: 5,
-            color: '#fff',
-          }}>
-          {currentTodo.is_birthday ? `Date & Time` : `Location`}
-        </Text>
-        <View
-          style={{
-            marginBottom: !isEditing ? 15 : 10,
-            borderWidth: 1,
-            borderRadius: 10,
-            borderColor: '#fff',
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-            position: 'relative',
-          }}>
-          <Image source={currentTodo.is_birthday ? calendar : pin} style={{marginHorizontal: 5}} />
-          {currentTodo.is_birthday ? 
-            (<TextInput
-              placeholder="Select Date & Time"
-              placeholderTextColor="#ffcc0040"
-              value={currentTodo.reminder_date_time_at}
-              onFocus={() => this.setState({mode: 'date', showModel: true})} />) : 
-            (<TextInput
-              placeholder="Market"
-              placeholderTextColor="#ffcc0040"
+        <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
+          <View style={{flex: 1, marginRight: currentTodo.is_birthday ? 15 : 0}}>
+            <Text
               style={{
-                flex: 1,
-                fontSize: 18,
-                color: '#ffcc00',
-                paddingHorizontal: 5,
-                paddingLeft: 0,
-                paddingVertical: 10,
-              }}
-              value={currentTodo.place}
-              onChangeText={txt => {
-                customSetState({currentTodo: {...currentTodo, place: txt}});
-                this.placeFinder(getPredictions, txt);
-              }}
-              onFocus={() => this.setState({showPredictions: true})}
-              onBlur={() => this.setState({showPredictions: false})}
-              editable={isLocationEditable}
-            />)}
+                fontSize: 24,
+                fontWeight: 'bold',
+                marginBottom: 5,
+                color: '#fff',
+              }}>
+              {currentTodo.is_birthday ? `Date` : `Location`}
+            </Text>
+            <View
+              style={{
+                marginBottom: !isEditing ? 15 : 10,
+                borderWidth: 1,
+                borderRadius: 10,
+                borderColor: '#fff',
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                position: 'relative',
+              }}>
+              <Image source={currentTodo.is_birthday ? calendar : pin} style={{marginHorizontal: 5}} />
+              {currentTodo.is_birthday ? 
+                (<TouchableOpacity onPress={() => this.setState({mode: 'date', showModel: true})}>
+                  <TextInput
+                  placeholder="21-03-2020"
+                  placeholderTextColor="#ffcc0040"
+                  value={sdate.toISOString().slice(0, 10)}
+                  style={{
+                    fontSize: 18,
+                    paddingHorizontal: 5,
+                    paddingVertical: 10,
+                    paddingRight: 10,
+                    color: '#ffcc00',
+                  }}
+                  editable={false} />
+                </TouchableOpacity>) : 
+                (<TextInput
+                  placeholder="Market"
+                  placeholderTextColor="#ffcc0040"
+                  style={{
+                    flex: 1,
+                    fontSize: 18,
+                    color: '#ffcc00',
+                    paddingHorizontal: 5,
+                    paddingLeft: 0,
+                    paddingVertical: 10,
+                  }}
+                  value={currentTodo.place}
+                  onChangeText={txt => {
+                    customSetState({currentTodo: {...currentTodo, place: txt}});
+                    this.placeFinder(getPredictions, txt);
+                  }}
+                  onFocus={() => this.setState({showPredictions: true})}
+                  onBlur={() => this.setState({showPredictions: false})}
+                  editable={isLocationEditable}
+                />)}
+            </View>
+          </View>
+          {currentTodo.is_birthday && (<View>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: 'bold',
+                marginBottom: 5,
+                color: '#fff',
+              }}>
+              Time
+            </Text>
+            <View
+              style={{
+                marginBottom: !isEditing ? 15 : 10,
+                borderWidth: 1,
+                borderRadius: 10,
+                borderColor: '#fff',
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                position: 'relative',
+              }}>
+              <Image source={calendar} style={{marginHorizontal: 5}} />
+                <TouchableOpacity onPress={() => this.setState({mode: 'time', showModel: true})}>
+                  <TextInput
+                    placeholder="21:00"
+                    placeholderTextColor="#ffcc0040"
+                    value={time.toTimeString().slice(0, 5)}
+                    style={{
+                      fontSize: 18,
+                      paddingHorizontal: 5,
+                      paddingVertical: 10,
+                      paddingRight: 10,
+                      color: '#ffcc00',
+                    }}
+                    editable={false} />
+                </TouchableOpacity>
+            </View>
+          </View>)}
         </View>
 
         {showPredictions && predictions.length === 0 && (
@@ -697,7 +768,7 @@ export default class TodosModal extends React.Component {
           )}
         </View>
         {showModel && (
-          <DateTimePicker mode={mode} value={mode === 'date' ? date : time} is24Hour={true} display="default" onChange={this.onChangeTime} />
+          <DateTimePicker mode={mode} value={mode === 'date' ? sdate : time} is24Hour={true} display="default" onChange={(e, selectedDate) => this.onChangeTime(mode === 'date' ? 'sdate' : 'time', selectedDate)} />
         )}
       </View>
     );
