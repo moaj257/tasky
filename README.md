@@ -6,9 +6,10 @@ We often forget tasks that we’ve to do on our way, for e.g. buying groceries w
 Tasky provides elegantly designed, easy to use location reminders which are highly personalized for you. Now you won’t forget the tasks you’ve to do on your way.
 
 ## Key Features
-- Google Login
-- Manage Tasks
-- Notification for each task.
-- Select a Date
-- Reminder distance - 0.5 km
-- Stack a pile of notifications
+- [x] Google Login
+- [x] Manage Tasks
+- [x] Notification for each task.
+- [x] Select a Date
+- [x] Reminder distance - 0.5 km
+- [x] Stack a pile of notifications
+- [ ] Birthday Reminder
