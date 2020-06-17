@@ -1,2 +1,2 @@
-# tasky
-Avanced task management app
+# Tasky
+:rocket: Avanced task management app
