@@ -10,6 +10,7 @@ export default class Todo extends Model {
   @field('is_complete') is_complete;
   @field('is_active') is_active;
   @field('is_birthday') is_birthday;
+  @field('is_notified') is_notified;
   @date('reminder_date_time_at') reminder_date_time_at;
   @field('lat') lat;
   @field('lng') lng;
@@ -26,6 +27,7 @@ export default class Todo extends Model {
       is_complete: this.is_complete,
       is_active: this.is_active,
       is_birthday: this.is_birthday,
+      is_notified: this.is_notified,
       reminder_date_time_at: this.reminder_date_time_at,
       lat: this.lat,
       lng: this.lng,
@@ -43,6 +45,7 @@ export default class Todo extends Model {
       todo.is_complete = updatedTodo.is_complete;
       todo.is_active = updatedTodo.is_active;
       todo.is_birthday = updatedTodo.is_birthday;
+      todo.is_notified = updatedTodo.is_notified;
       todo.reminder_date_time_at = updatedTodo.reminder_date_time_at;
       todo.lat = updatedTodo.lat;
       todo.lng = updatedTodo.lng;

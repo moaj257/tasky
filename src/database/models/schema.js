@@ -23,6 +23,7 @@ export const mySchema = appSchema({
         {name: 'is_complete', type: 'boolean', isIndexed: true},
         {name: 'is_active', type: 'boolean', isIndexed: true},
         {name: 'is_birthday', type: 'boolean', isIndexed: true},
+        {name: 'is_notified', type: 'boolean', isIndexed: true},
         {name: 'reminder_date_time_at', type: 'number'},
         {name: 'lat', type: 'string'},
         {name: 'lng', type: 'string'},

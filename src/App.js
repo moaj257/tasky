@@ -81,6 +81,7 @@ class AppClass extends React.Component {
       lng: null,
       lat: null,
       is_birthday: false,
+      is_notified: false,
       reminder_date_time_at: null,
       placeId: null,
       is_active: true,
@@ -159,6 +160,7 @@ class AppClass extends React.Component {
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
         todo.is_birthday = currentTodo.is_birthday;
+        todo.is_notified = false;
         todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.placeId = currentTodo.placeId;
         todo.userId = info.user.id;
@@ -185,7 +187,7 @@ class AppClass extends React.Component {
     });
   };
 
-  updateTodos = async todoId => {
+  updateTodos = async (todoId, is_notified) => {
     this.setState({todosLoading: true, completedTodosLoading: true});
     let {user, currentTodo} = this.state;
     const {info} = user;
@@ -197,6 +199,7 @@ class AppClass extends React.Component {
         todo.place = currentTodo.place;
         todo.is_complete = currentTodo.is_complete;
         todo.is_active = true;
+        todo.is_notified = is_notified;
         todo.is_birthday = currentTodo.is_birthday;
         todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.lat = currentTodo.lat;
@@ -238,6 +241,7 @@ class AppClass extends React.Component {
         todo.place = currentTodo.place;
         todo.is_complete = currentTodo.is_complete;
         todo.is_active = false;
+        todo.is_notified = currentTodo.is_notified;
         todo.is_birthday = currentTodo.is_birthday;
         todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.lat = currentTodo.lat;
@@ -262,6 +266,7 @@ class AppClass extends React.Component {
         placeId: null,
         is_active: true,
         is_birthday: false,
+        is_notified: false,
         reminder_date_time_at: null,
         is_complete: false,
       },
@@ -351,8 +356,8 @@ class AppClass extends React.Component {
           todo.lng,
         );
         this.setState({lat: nextState.latitude, lng: nextState.longitude});
-        if (distance <= 0.5) {
-          let localNotification = Notifications.postLocalNotification({
+        if (distance <= 0.5 && !todo.is_notified) {
+          Notifications.postLocalNotification({
             body: `${todo.title} at ${todo.place}`,
             title: 'Hey there!',
             silent: false,
@@ -363,27 +368,26 @@ class AppClass extends React.Component {
             lat: this.state.lat,
             lng: this.state.lng,
           });
-          Notifications.cancelLocalNotification(localNotification);
         }
       });
     }
     
     if (birthdaytodos.length > 0){
       birthdaytodos.map(birthdaytodo => {
+        console.log(birthdaytodo, moment(new Date()).format('hh:mm:ss a'), '__TEST__');
         let beginningTime = moment(birthdaytodo.reminder_date_time_at);
         let endTime1 = moment().subtract(2, 'minutes');
         let endTime2 = moment().add(2, 'minutes');
         console.log(beginningTime.isBetween(endTime1,endTime2));
-        if(beginningTime.isBetween(endTime1,endTime2)){
-          let localNotification = Notifications.postLocalNotification({
-            body: `${birthdaytodo.title.indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} at ${beginningTime.format('DD/MM/YYY HH:mm')}`,
+        if(beginningTime.isBetween(endTime1,endTime2) && !birthdaytodo.is_notified){
+          Notifications.postLocalNotification({
+            body: `${birthdaytodo.title.indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} at ${beginningTime.format('DD/MM/YYY hh:mm A')}`,
             title: 'Hey there!',
             silent: false,
             category: 'TASKY_BIRTHDAY',
-            payload: todo,
+            payload: birthdaytodo,
           });
-          this.updateTodos(birthdaytodo.id);
-          Notifications.cancelLocalNotification(localNotification);
+          this.updateTodos(birthdaytodo.id, 1);
         }
       });
     }

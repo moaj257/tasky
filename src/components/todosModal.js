@@ -7,11 +7,9 @@ import {
   Image,
   Text,
   TextInput,
-  Dimensions,
   Alert,
   Switch,
   ScrollView,
-  Platform
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import DatePicker from 'react-native-date-picker';
@@ -740,7 +738,7 @@ export default class TodosModal extends React.Component {
                 }}
                 onPress={() => {
                   Keyboard.dismiss();
-                  !isEditing ? addTodos(currentTodo) : updateTodos(currentTodo.id);
+                  !isEditing ? addTodos(currentTodo) : updateTodos(currentTodo.id, 0);
                   toggleAction();
                 }}
                 disabled={isSaveDisabled}>
