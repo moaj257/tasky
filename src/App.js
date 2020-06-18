@@ -8,6 +8,7 @@ import {
 import SplashScreen from 'react-native-splash-screen';
 import {Q} from '@nozbe/watermelondb';
 import {Notifications} from 'react-native-notifications';
+import moment from 'moment';
 
 import LoginScreen from './screens/loginScreen';
 import DashScreen from './screens/dashScreen';
@@ -22,6 +23,9 @@ import Close from './assets/images/close.png';
 import Cancel from './assets/images/cancel.png';
 import Tick from './assets/images/tick.png';
 import Logo from './assets/images/logo.png';
+import Calendar from './assets/images/calendar.png';
+import Cake from './assets/images/cake-pop.png';
+import Clock from './assets/images/clock.png';
 
 import {WEB_CLIENT_ID} from './utils/keys';
 import {getDistanceFromLatLonInKm, uuid} from './utils/functions';
@@ -29,27 +33,6 @@ import {withLocationPermissions} from './utils/withLocationPermissions';
 import {database} from './database';
 
 const {height, width} = Dimensions.get('window');
-
-// const getLocation = async () => {
-//   await GetLocation.getCurrentPosition({
-//     enableHighAccuracy: true,
-//     timeout: 15000,
-//   })
-//     .then(location => {
-//       console.log(location, '__!!@@__LOC__');
-//       let distance = getDistanceFromLatLonInKm(
-//         location.latitude,
-//         location.longitude,
-//         11.8919026,
-//         79.810501,
-//       );
-//       console.log(distance, '__DISTANCE__');
-//     })
-//     .catch(error => {
-//       const {code, message} = error;
-//       console.warn(code, message, '__!!@@__LOC__ERR__');
-//     });
-// };
 
 class AppClass extends React.Component {
   timeInterval = null;
@@ -64,6 +47,9 @@ class AppClass extends React.Component {
       cancel: Cancel,
       tick: Tick,
       logo: Logo,
+      calendar: Calendar,
+      cake: Cake,
+      clock: Clock,
     },
     devInfo: {
       height: height,
@@ -85,6 +71,7 @@ class AppClass extends React.Component {
       user: null,
     },
     todos: [],
+    birthdaytodos: [],
     completedTodos: [],
     currentTodo: {
       id: null,
@@ -93,6 +80,9 @@ class AppClass extends React.Component {
       place: null,
       lng: null,
       lat: null,
+      is_birthday: false,
+      is_notified: false,
+      reminder_date_time_at: null,
       placeId: null,
       is_active: true,
       is_complete: false,
@@ -131,6 +121,7 @@ class AppClass extends React.Component {
     let todos = [];
     let activeTodos = [];
     let completedTodos = [];
+    let birthdaytodos = [];
 
     todos = await database.collections
       .get('todos')
@@ -144,11 +135,13 @@ class AppClass extends React.Component {
           ...completedTodos,
         ];
       } else {
+        if(todo.is_birthday)
+          birthdaytodos = [{...todo.getTodo(), id: todo._raw.id}, ...birthdaytodos];
         activeTodos = [{...todo.getTodo(), id: todo._raw.id}, ...activeTodos];
       }
     });
 
-    this.setState({todos: activeTodos, completedTodos: completedTodos}, () => {
+    this.setState({todos: activeTodos, completedTodos: completedTodos, birthdaytodos: birthdaytodos}, () => {
       this.setState({todosLoading: false, completedTodosLoading: false});
     });
   };
@@ -166,6 +159,9 @@ class AppClass extends React.Component {
         todo.is_active = true;
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
+        todo.is_birthday = currentTodo.is_birthday;
+        todo.is_notified = false;
+        todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.placeId = currentTodo.placeId;
         todo.userId = info.user.id;
         todo.created_at = new Date().getTime();
@@ -182,6 +178,8 @@ class AppClass extends React.Component {
         place: null,
         lat: null,
         lng: null,
+        is_birthday: false,
+        reminder_date_time_at: null,
         placeId: null,
         is_active: true,
         is_complete: false,
@@ -189,7 +187,7 @@ class AppClass extends React.Component {
     });
   };
 
-  updateTodos = async todoId => {
+  updateTodos = async (todoId, is_notified) => {
     this.setState({todosLoading: true, completedTodosLoading: true});
     let {user, currentTodo} = this.state;
     const {info} = user;
@@ -201,6 +199,9 @@ class AppClass extends React.Component {
         todo.place = currentTodo.place;
         todo.is_complete = currentTodo.is_complete;
         todo.is_active = true;
+        todo.is_notified = is_notified;
+        todo.is_birthday = currentTodo.is_birthday;
+        todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
         todo.placeId = currentTodo.placeId;
@@ -218,6 +219,8 @@ class AppClass extends React.Component {
         place: null,
         lat: null,
         lng: null,
+        is_birthday: false,
+        reminder_date_time_at: null,
         placeId: null,
         is_active: true,
         is_complete: false,
@@ -238,6 +241,9 @@ class AppClass extends React.Component {
         todo.place = currentTodo.place;
         todo.is_complete = currentTodo.is_complete;
         todo.is_active = false;
+        todo.is_notified = currentTodo.is_notified;
+        todo.is_birthday = currentTodo.is_birthday;
+        todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
         todo.placeId = currentTodo.placeId;
@@ -259,6 +265,9 @@ class AppClass extends React.Component {
         lng: null,
         placeId: null,
         is_active: true,
+        is_birthday: false,
+        is_notified: false,
+        reminder_date_time_at: null,
         is_complete: false,
       },
     });
@@ -297,7 +306,20 @@ class AppClass extends React.Component {
     return await fetch(
       `https://api.foursquare.com/v2/venues/search?query=${q}&near=Pondicherry,%20IN&limit=5&v=20200429&client_id=${client_id}&client_secret=${client_secret}`,
     )
-      .then(res => res.json())
+      .then(async res => {
+        let placesArr = [];
+        let places = await database.collections
+          .get('places')
+          .query(Q.where('is_active', true), Q.where('name', Q.like(`${q}`)))
+          .fetch();
+        places.map(place => {
+          placesArr = [...placesArr, {...place, location: {lat: place.lat, lng: place.lng}}];
+        });
+
+        let resp = res.json();
+        resp = {...resp, response: {...resp.response, venues: [...resp.response.venues, ...placesArr]}};
+        return resp;
+      })
       .catch(err => err.json());
   };
 
@@ -320,8 +342,8 @@ class AppClass extends React.Component {
     NativeModules.LocationManager.stopBackgroundLocation();
   };
 
-  checkLocationUpdates = async nextState => {
-    const {lat, lng, todos} = this.state;
+  checkNotifications = async nextState => {
+    const {lat, lng, todos, birthdaytodos} = this.state;
     if (
       todos.length > 0 &&
       (lat !== nextState.latitude || lng !== nextState.longitude)
@@ -334,7 +356,7 @@ class AppClass extends React.Component {
           todo.lng,
         );
         this.setState({lat: nextState.latitude, lng: nextState.longitude});
-        if (distance <= 0.5) {
+        if (distance <= 0.5 && !todo.is_notified) {
           Notifications.postLocalNotification({
             body: `${todo.title} at ${todo.place}`,
             title: 'Hey there!',
@@ -349,14 +371,49 @@ class AppClass extends React.Component {
         }
       });
     }
+    
+    if (birthdaytodos.length > 0){
+      birthdaytodos.map(birthdaytodo => {
+        console.log(birthdaytodo, moment(new Date()).format('hh:mm:ss a'), '__TEST__');
+        let beginningTime = moment(birthdaytodo.reminder_date_time_at);
+        let endTime1 = moment().subtract(2, 'minutes');
+        let endTime2 = moment().add(2, 'minutes');
+        console.log(beginningTime.isBetween(endTime1,endTime2));
+        if(beginningTime.isBetween(endTime1,endTime2) && !birthdaytodo.is_notified){
+          Notifications.postLocalNotification({
+            body: `${birthdaytodo.title.indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} at ${beginningTime.format('DD/MM/YYY hh:mm A')}`,
+            title: 'Hey there!',
+            silent: false,
+            category: 'TASKY_BIRTHDAY',
+            payload: birthdaytodo,
+          });
+          this.updateTodos(birthdaytodo.id, 1);
+        }
+      });
+    }
   };
+  
+  addPlaces = async (placeData) => {
+    await database.action(async () => {
+      await database.collections.get('places').create(place => {
+        place.uuid = uuid();
+        place.name = placeData.name;
+        place.lat = placeData.lat;
+        place.lng = placeData.lng;
+        place.is_active = true;
+        place.created_at = new Date().getTime();
+        place.updated_at = new Date().getTime();
+      });
+    });
+  }
 
   componentDidMount() {
+    // this.addPlaces({name: '', lat: '', lng: ''})
     SplashScreen.hide();
     this.subscription = DeviceEventEmitter.addListener(
       NativeModules.LocationManager.JS_LOCATION_EVENT_NAME,
       e => {
-        this.checkLocationUpdates(e);
+        this.checkNotifications(e);
       },
     );
     this.onEnableLocationPress();
