@@ -13,7 +13,7 @@ export default class TodoItem extends React.Component {
       // is_active,
     } = this.props;
     const {assets} = states;
-    const {blob2, blob1, pin} = assets;
+    const {blob2, blob1, pin, cake} = assets;
     // const {todos} = states;
     return (
       <TouchableOpacity
@@ -43,11 +43,11 @@ export default class TodoItem extends React.Component {
           {todo.title}
         </Text>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Image source={pin} style={{height: 18, width: 18}} />
+          <Image source={todo.is_birthday ? cake : pin} style={{height: 18, width: 18}} />
           <Text
             style={{fontSize: 16, color: '#0000009a', marginLeft: 5, flex: 1}}
             numberOfLines={1}>
-            {todo.place}
+            {todo.is_birthday ? `Birthday at ${todo.reminder_date_time_at.toISOString().slice(0, 10)} ${todo.reminder_date_time_at.toTimeString().slice(0, 5)}` : todo.place}
           </Text>
         </View>
         <View

@@ -8,6 +8,7 @@ import {
 import SplashScreen from 'react-native-splash-screen';
 import {Q} from '@nozbe/watermelondb';
 import {Notifications} from 'react-native-notifications';
+import moment from 'moment';
 
 import LoginScreen from './screens/loginScreen';
 import DashScreen from './screens/dashScreen';
@@ -23,6 +24,8 @@ import Cancel from './assets/images/cancel.png';
 import Tick from './assets/images/tick.png';
 import Logo from './assets/images/logo.png';
 import Calendar from './assets/images/calendar.png';
+import Cake from './assets/images/cake-pop.png';
+import Clock from './assets/images/clock.png';
 
 import {WEB_CLIENT_ID} from './utils/keys';
 import {getDistanceFromLatLonInKm, uuid} from './utils/functions';
@@ -45,6 +48,8 @@ class AppClass extends React.Component {
       tick: Tick,
       logo: Logo,
       calendar: Calendar,
+      cake: Cake,
+      clock: Clock,
     },
     devInfo: {
       height: height,
@@ -66,6 +71,7 @@ class AppClass extends React.Component {
       user: null,
     },
     todos: [],
+    birthdaytodos: [],
     completedTodos: [],
     currentTodo: {
       id: null,
@@ -114,6 +120,7 @@ class AppClass extends React.Component {
     let todos = [];
     let activeTodos = [];
     let completedTodos = [];
+    let birthdaytodos = [];
 
     todos = await database.collections
       .get('todos')
@@ -127,11 +134,13 @@ class AppClass extends React.Component {
           ...completedTodos,
         ];
       } else {
+        if(todo.is_birthday)
+          birthdaytodos = [{...todo.getTodo(), id: todo._raw.id}, ...birthdaytodos];
         activeTodos = [{...todo.getTodo(), id: todo._raw.id}, ...activeTodos];
       }
     });
 
-    this.setState({todos: activeTodos, completedTodos: completedTodos}, () => {
+    this.setState({todos: activeTodos, completedTodos: completedTodos, birthdaytodos: birthdaytodos}, () => {
       this.setState({todosLoading: false, completedTodosLoading: false});
     });
   };
@@ -328,8 +337,8 @@ class AppClass extends React.Component {
     NativeModules.LocationManager.stopBackgroundLocation();
   };
 
-  checkLocationUpdates = async nextState => {
-    const {lat, lng, todos} = this.state;
+  checkNotifications = async nextState => {
+    const {lat, lng, todos, birthdaytodos} = this.state;
     if (
       todos.length > 0 &&
       (lat !== nextState.latitude || lng !== nextState.longitude)
@@ -343,7 +352,7 @@ class AppClass extends React.Component {
         );
         this.setState({lat: nextState.latitude, lng: nextState.longitude});
         if (distance <= 0.5) {
-          Notifications.postLocalNotification({
+          let localNotification = Notifications.postLocalNotification({
             body: `${todo.title} at ${todo.place}`,
             title: 'Hey there!',
             silent: false,
@@ -354,7 +363,26 @@ class AppClass extends React.Component {
             lat: this.state.lat,
             lng: this.state.lng,
           });
+          Notifications.cancelLocalNotification(localNotification);
         }
+      });
+    } else if (birthdaytodos.length > 0){
+      birthdaytodos.map(birthdaytodo => {
+        let beginningTime = moment(birthdaytodo.reminder_date_time_at);
+        let endTime1 = moment().subtract(2, 'minutes');
+        let endTime2 = moment().add(2, 'minutes');
+
+        let localNotification = Notifications.postLocalNotification({
+          body: `${birthdaytodo.title.indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} at ${beginningTime.format('DD/MM/YYY HH:mm')}`,
+          title: 'Hey there!',
+          silent: false,
+          category: 'TASKY_BIRTHDAY',
+          payload: todo,
+        });
+        this.updateTodos(birthdaytodo.id);
+        Notifications.cancelLocalNotification(localNotification);
+
+        console.log(beginningTime.isBetween(endTime1,endTime2));
       });
     }
   };
@@ -379,7 +407,7 @@ class AppClass extends React.Component {
     this.subscription = DeviceEventEmitter.addListener(
       NativeModules.LocationManager.JS_LOCATION_EVENT_NAME,
       e => {
-        this.checkLocationUpdates(e);
+        this.checkNotifications(e);
       },
     );
     this.onEnableLocationPress();
