@@ -366,23 +366,25 @@ class AppClass extends React.Component {
           Notifications.cancelLocalNotification(localNotification);
         }
       });
-    } else if (birthdaytodos.length > 0){
+    }
+    
+    if (birthdaytodos.length > 0){
       birthdaytodos.map(birthdaytodo => {
         let beginningTime = moment(birthdaytodo.reminder_date_time_at);
         let endTime1 = moment().subtract(2, 'minutes');
         let endTime2 = moment().add(2, 'minutes');
-
-        let localNotification = Notifications.postLocalNotification({
-          body: `${birthdaytodo.title.indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} at ${beginningTime.format('DD/MM/YYY HH:mm')}`,
-          title: 'Hey there!',
-          silent: false,
-          category: 'TASKY_BIRTHDAY',
-          payload: todo,
-        });
-        this.updateTodos(birthdaytodo.id);
-        Notifications.cancelLocalNotification(localNotification);
-
         console.log(beginningTime.isBetween(endTime1,endTime2));
+        if(beginningTime.isBetween(endTime1,endTime2)){
+          let localNotification = Notifications.postLocalNotification({
+            body: `${birthdaytodo.title.indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} at ${beginningTime.format('DD/MM/YYY HH:mm')}`,
+            title: 'Hey there!',
+            silent: false,
+            category: 'TASKY_BIRTHDAY',
+            payload: todo,
+          });
+          this.updateTodos(birthdaytodo.id);
+          Notifications.cancelLocalNotification(localNotification);
+        }
       });
     }
   };
