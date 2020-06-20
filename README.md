@@ -12,4 +12,8 @@ Tasky provides elegantly designed, easy to use location reminders which are high
 - [x] Select a Date
 - [x] Reminder distance - 0.5 km
 - [x] Stack a pile of notifications
-- [ ] Birthday Reminder
+- [x] Birthday Reminder
+- [ ] Multiple device support
+- [ ] Sync with Live DB
+- [ ] Signout from all devices
+- [ ] Security Enhancements - Encryption
