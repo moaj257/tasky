@@ -34,6 +34,7 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
           // packages.add(new MyReactNativePackage());
           packages.add(new LocationPackage());
           packages.add(new WatermelonDBPackage());
+          packages.add(new ReactCheckBoxPackage());
           return packages;
         }
 

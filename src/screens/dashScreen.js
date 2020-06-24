@@ -84,6 +84,7 @@ export default class DashScreen extends React.Component {
       customSetState,
       addTodos,
       updateTodos,
+      addPlaces,
       deleteTodos,
       handleEditTodos,
       getPredictions,
@@ -259,6 +260,7 @@ export default class DashScreen extends React.Component {
             toggleAction={this.toggleAction}
             customSetState={customSetState}
             addTodos={addTodos}
+            addPlaces={addPlaces}
             updateTodos={updateTodos}
             deleteTodos={deleteTodos}
           />

@@ -12,18 +12,23 @@ import {
   ScrollView,
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
+import Geolocation from '@react-native-community/geolocation';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
-
-// const {width} = Dimensions.get('window');
+import {Q} from '@nozbe/watermelondb';
+import {database} from '../database';
 
 export default class TodosModal extends React.Component {
   state = {
     predictions: [],
     showPredictions: false,
+    showPopup: false,
     isLocationEditable: true,
     mapError: null,
     mode: null,
+    lat: null,
+    lng: null,
+    place: null,
     showModel: false,
     sdate: new Date(),
   };
@@ -32,223 +37,21 @@ export default class TodosModal extends React.Component {
     if (q.length <= 3) {
       return;
     }
-    // let predictions = {
-    //   meta: {code: 200, requestId: '5ea95015211536324b5b8439'},
-    //   response: {
-    //     venues: [
-    //       {
-    //         id: '5014c4e9e4b097af8abacef9',
-    //         name: 'Bharathi Park',
-    //         location: {
-    //           lat: 11.932934467463282,
-    //           lng: 79.83429398684618,
-    //           labeledLatLngs: [
-    //             {
-    //               label: 'display',
-    //               lat: 11.932934467463282,
-    //               lng: 79.83429398684618,
-    //             },
-    //           ],
-    //           cc: 'IN',
-    //           country: 'India',
-    //           formattedAddress: ['India'],
-    //         },
-    //         categories: [
-    //           {
-    //             id: '4bf58dd8d48988d163941735',
-    //             name: 'Park',
-    //             pluralName: 'Parks',
-    //             shortName: 'Park',
-    //             icon: {
-    //               prefix:
-    //                 'https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_',
-    //               suffix: '.png',
-    //             },
-    //             primary: true,
-    //           },
-    //         ],
-    //         referralId: 'v-1588154673',
-    //         hasPerk: false,
-    //       },
-    //       {
-    //         id: '5c820a4d603d2a002ce459d1',
-    //         name: 'French Park',
-    //         location: {
-    //           address: '83 JN Street\npondicherry',
-    //           lat: 11.935769,
-    //           lng: 79.83091,
-    //           labeledLatLngs: [
-    //             {label: 'display', lat: 11.935769, lng: 79.83091},
-    //           ],
-    //           postalCode: '605001',
-    //           cc: 'IN',
-    //           city: 'Puducherry',
-    //           state: 'Union Territory of Puducherry',
-    //           country: 'India',
-    //           formattedAddress: [
-    //             '83 JN Street',
-    //             'pondicherry',
-    //             'Puducherry 605001',
-    //             'Union Territory of Puducherry',
-    //             'India',
-    //           ],
-    //         },
-    //         categories: [
-    //           {
-    //             id: '4bf58dd8d48988d103951735',
-    //             name: 'Clothing Store',
-    //             pluralName: 'Clothing Stores',
-    //             shortName: 'Apparel',
-    //             icon: {
-    //               prefix:
-    //                 'https://ss3.4sqi.net/img/categories_v2/shops/apparel_',
-    //               suffix: '.png',
-    //             },
-    //             primary: true,
-    //           },
-    //         ],
-    //         referralId: 'v-1588154673',
-    //         hasPerk: false,
-    //       },
-    //       {
-    //         id: '51e402ce498e6f1752d3add3',
-    //         name: 'Raymond Park Avenue',
-    //         location: {
-    //           lat: 11.934395,
-    //           lng: 79.826774,
-    //           labeledLatLngs: [
-    //             {label: 'display', lat: 11.934395, lng: 79.826774},
-    //           ],
-    //           cc: 'IN',
-    //           country: 'India',
-    //           formattedAddress: ['India'],
-    //         },
-    //         categories: [
-    //           {
-    //             id: '4bf58dd8d48988d106951735',
-    //             name: "Men's Store",
-    //             pluralName: "Men's Stores",
-    //             shortName: "Men's Store",
-    //             icon: {
-    //               prefix:
-    //                 'https://ss3.4sqi.net/img/categories_v2/shops/apparel_men_',
-    //               suffix: '.png',
-    //             },
-    //             primary: true,
-    //           },
-    //         ],
-    //         referralId: 'v-1588154673',
-    //         hasPerk: false,
-    //       },
-    //       {
-    //         id: '50189effe4b0deb6b21fe553',
-    //         name: 'Hotel Sun Park',
-    //         location: {
-    //           lat: 11.933549510734087,
-    //           lng: 79.82663492034125,
-    //           labeledLatLngs: [
-    //             {
-    //               label: 'display',
-    //               lat: 11.933549510734087,
-    //               lng: 79.82663492034125,
-    //             },
-    //           ],
-    //           cc: 'IN',
-    //           country: 'India',
-    //           formattedAddress: ['India'],
-    //         },
-    //         categories: [
-    //           {
-    //             id: '4bf58dd8d48988d1fa931735',
-    //             name: 'Hotel',
-    //             pluralName: 'Hotels',
-    //             shortName: 'Hotel',
-    //             icon: {
-    //               prefix:
-    //                 'https://ss3.4sqi.net/img/categories_v2/travel/hotel_',
-    //               suffix: '.png',
-    //             },
-    //             primary: true,
-    //           },
-    //         ],
-    //         referralId: 'v-1588154673',
-    //         hasPerk: false,
-    //       },
-    //       {
-    //         id: '5285896411d23c159db20304',
-    //         name: 'Horti-Park KVK',
-    //         location: {
-    //           address: 'Ellaipillaichavady',
-    //           crossStreet: 'Villupuram Road',
-    //           lat: 11.930330052442894,
-    //           lng: 79.82518496957002,
-    //           labeledLatLngs: [
-    //             {
-    //               label: 'display',
-    //               lat: 11.930330052442894,
-    //               lng: 79.82518496957002,
-    //             },
-    //           ],
-    //           postalCode: '605005',
-    //           cc: 'IN',
-    //           city: 'Puducherry',
-    //           state: 'Union Territory of Puducherry',
-    //           country: 'India',
-    //           formattedAddress: [
-    //             'Ellaipillaichavady (Villupuram Road)',
-    //             'Puducherry 605005',
-    //             'Union Territory of Puducherry',
-    //             'India',
-    //           ],
-    //         },
-    //         categories: [
-    //           {
-    //             id: '4bf58dd8d48988d11b951735',
-    //             name: 'Flower Shop',
-    //             pluralName: 'Flower Shops',
-    //             shortName: 'Flower Shop',
-    //             icon: {
-    //               prefix:
-    //                 'https://ss3.4sqi.net/img/categories_v2/shops/flowershop_',
-    //               suffix: '.png',
-    //             },
-    //             primary: true,
-    //           },
-    //         ],
-    //         referralId: 'v-1588154673',
-    //         hasPerk: false,
-    //       },
-    //     ],
-    //     geocode: {
-    //       what: '',
-    //       where: 'pondicherry in',
-    //       feature: {
-    //         cc: 'IN',
-    //         name: 'Puducherry',
-    //         displayName: 'Puducherry, Union Territory of Puducherry, India',
-    //         matchedName: 'Pondicherry, Union Territory of Puducherry, IN',
-    //         highlightedName:
-    //           '<b>Pondicherry</b>, Union Territory of Puducherry, <b>IN</b>',
-    //         woeType: 7,
-    //         slug: 'puducherry-india',
-    //         id: 'geonameid:1259425',
-    //         longId: '72057594039187361',
-    //         geometry: {
-    //           center: {lat: 11.93381, lng: 79.82979},
-    //           bounds: {
-    //             ne: {lat: 11.989259814081308, lng: 79.85232329825784},
-    //             sw: {lat: 11.78841565732688, lng: 79.75705811820067},
-    //           },
-    //         },
-    //       },
-    //       parents: [],
-    //     },
-    //   },
-    // };
+    this.setState({showPredictions: true});
 
     let predictions = await func(q);
+    let placesArr = [];
+    let places = await database.collections
+      .get('places')
+      .query(Q.where('is_active', true), Q.where('name', Q.like(`%${q}%`)))
+      .fetch();
+    places.map(place => {
+      let pdata = place.getPlace();
+      let { created_at, updated_at, ...pfdata } = pdata;
+      placesArr = [...placesArr, {...pfdata, location: {lat: pfdata.lat, lng: pfdata.lng}}];
+    });
     if (predictions && predictions.response && predictions.response.venues) {
-      this.setState({predictions: predictions.response.venues});
+      this.setState({predictions: [...placesArr, ...predictions.response.venues]});
     } else {
       Alert.alert(predictions.toString());
     }
@@ -297,8 +100,30 @@ export default class TodosModal extends React.Component {
     this.setState({ showModel: false, sdate: new Date() });
   }
 
+  handlePopUp = () => {
+    const {showPopup} = this.state;
+    Geolocation.getCurrentPosition(
+       (position) => {
+          const lat = JSON.stringify(position.coords.longitude);
+          const lng = JSON.stringify(position.coords.latitude);
+          this.setState({ showPopup: !showPopup, lat, lng });
+       },
+       (error) => alert(error.message),
+       {timeout: 20000}
+    );
+  }
+
+  handleAddLocation = () => {
+    const {customSetState, states, addPlaces} = this.props;
+    const {place, showPopup, lat, lng} = this.state;
+    const {currentTodo} = states;
+    addPlaces({name: place, lat: lat, lng: lng});
+    customSetState({currentTodo: {...currentTodo, place: place, lat: lat, lng: lng}});
+    this.setState({ showPopup: !showPopup });
+  }
+
   render() {
-    const {predictions, showPredictions, isLocationEditable, sdate, showModel} = this.state;
+    const {predictions, showPredictions, isLocationEditable, sdate, showModel, showPopup, lat, lng, place} = this.state;
     const {
       states,
       toggleAction,
@@ -309,9 +134,8 @@ export default class TodosModal extends React.Component {
       getPredictions,
     } = this.props;
     const {assets, currentTodo, isEditing, isLocations, locations, devInfo} = states;
-    const {pin, calendar, text, close, blob1} = assets;
+    const {pin, calendar, text, close, blob1, currentLoc, back} = assets;
     const {width, height} = devInfo;
-    console.log(currentTodo.reminder_date_time_at, 'reminder_date_time_at');
 
     if (isLocations) {
       return (
@@ -404,6 +228,11 @@ export default class TodosModal extends React.Component {
     }
 
     let isSaveDisabled = true;
+    let isAddDisabled = true;
+    if(place !== null && place.length > 0 && lat !== null && lng !== null){
+      isAddDisabled = false;
+    }
+    console.log(this.state.place, isAddDisabled, '__isAddDisabled');
     if (
       currentTodo.title !== undefined &&
       currentTodo.title !== null &&
@@ -472,9 +301,10 @@ export default class TodosModal extends React.Component {
                     marginBottom: 0,
                     color: '#fff',
                   }}>
-                  {isEditing ? 'Update' : 'Add'} Todo
+                  {showPopup ? `Add Location` : `${isEditing ? 'Update' : 'Add'} Todo`}
                 </Text>
-                <View
+                {!showPopup &&
+                (<View
                   style={{
                     marginBottom: 10,
                     flexDirection: 'row',
@@ -494,9 +324,9 @@ export default class TodosModal extends React.Component {
                     onValueChange={ () => customSetState({currentTodo: {...currentTodo, is_birthday: !currentTodo.is_birthday}}) }
                     value={currentTodo.is_birthday}
                   />
-                </View>
+                </View>)}
               </View>
-              <TouchableOpacity
+              {!showPopup ? (<TouchableOpacity
                 style={{
                   padding: 15,
                   backgroundColor: '#ffcc00',
@@ -507,7 +337,18 @@ export default class TodosModal extends React.Component {
                   toggleAction();
                 }}>
                 <Image source={close} style={{height: 16, width: 16}} />
-              </TouchableOpacity>
+              </TouchableOpacity>) : (<TouchableOpacity
+                style={{
+                  padding: 15,
+                  backgroundColor: '#ffcc00',
+                  borderRadius: 30,
+                }}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  this.handlePopUp();
+                }}>
+                <Image source={back} style={{height: 16, width: 16}} />
+              </TouchableOpacity>)}
             </View>
             <Text
               style={{
@@ -516,7 +357,7 @@ export default class TodosModal extends React.Component {
                 marginBottom: 5,
                 color: '#fff',
               }}>
-              {currentTodo.is_birthday ? `Name` : `Title`}
+              {!showPopup ? `${currentTodo.is_birthday ? `Name` : `Title`}` : `Name`}
             </Text>
             <View
               style={{
@@ -533,7 +374,7 @@ export default class TodosModal extends React.Component {
                 style={{marginHorizontal: 5, width: 28, height: 28}}
               />
               <TextInput
-                placeholder={currentTodo.is_birthday ? `John Doe` : `Green Peas`}
+                placeholder={!showPopup ? `${currentTodo.is_birthday ? `John Doe` : `Green Peas`}` : 'Home'}
                 placeholderTextColor="#ffcc0040"
                 style={{
                   flex: 1,
@@ -543,14 +384,50 @@ export default class TodosModal extends React.Component {
                   paddingLeft: 0,
                   paddingVertical: 10,
                 }}
-                value={currentTodo.title}
+                value={!showPopup ? currentTodo.title : place}
                 onChangeText={txt =>
-                  customSetState({currentTodo: {...currentTodo, title: txt}})
+                  !showPopup ? customSetState({currentTodo: {...currentTodo, title: txt}}) : this.setState({place: txt})
                 }
               />
             </View>
             <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
-              <View style={{flex: 1}}>
+              {showPopup && (<View style={{flex: 1}}>
+                <Text
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    marginBottom: 5,
+                    color: '#fff',
+                  }}>
+                  Location
+                </Text>
+                <View
+                  style={{
+                    marginBottom: !isEditing ? 15 : 10,
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    borderColor: '#fff',
+                    flexDirection: 'row',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    position: 'relative',
+                  }}>
+                  <Image source={pin} style={{marginHorizontal: 5}} />
+                  <TextInput
+                      placeholder="13.145, -76.543"
+                      placeholderTextColor="#ffcc0040"
+                      value={`${lat}, ${lng}`}
+                      style={{
+                        fontSize: 18,
+                        paddingHorizontal: 5,
+                        paddingVertical: 10,
+                        paddingRight: 10,
+                        color: '#ffcc00',
+                      }}
+                      editable={false} />
+                </View>
+              </View>)}
+              {!showPopup && (<View style={{flex: 1}}>
                 <Text
                   style={{
                     fontSize: 24,
@@ -562,7 +439,7 @@ export default class TodosModal extends React.Component {
                 </Text>
                 <View
                   style={{
-                    marginBottom: !isEditing ? 15 : 10,
+                    marginBottom: !isEditing ? 15 : 0,
                     borderWidth: 1,
                     borderRadius: 10,
                     borderColor: '#fff',
@@ -587,66 +464,35 @@ export default class TodosModal extends React.Component {
                       }}
                       editable={false} />
                     </TouchableOpacity>) : 
-                    (<TextInput
-                      placeholder="Market"
-                      placeholderTextColor="#ffcc0040"
-                      style={{
-                        flex: 1,
-                        fontSize: 18,
-                        color: '#ffcc00',
-                        paddingHorizontal: 5,
-                        paddingLeft: 0,
-                        paddingVertical: 10,
-                      }}
-                      value={currentTodo.place}
-                      onChangeText={txt => {
-                        customSetState({currentTodo: {...currentTodo, place: txt}});
-                        this.placeFinder(getPredictions, txt);
-                      }}
-                      onFocus={() => this.setState({showPredictions: true})}
-                      onBlur={() => this.setState({showPredictions: false})}
-                      editable={isLocationEditable}
-                    />)}
-                </View>
-              </View>
-              {/* {currentTodo.is_birthday && (<View>
-                <Text
-                  style={{
-                    fontSize: 24,
-                    fontWeight: 'bold',
-                    marginBottom: 5,
-                    color: '#fff',
-                  }}>
-                  Time
-                </Text>
-                <View
-                  style={{
-                    marginBottom: !isEditing ? 15 : 10,
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    borderColor: '#fff',
-                    flexDirection: 'row',
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    position: 'relative',
-                  }}>
-                  <Image source={clock} style={{marginHorizontal: 5}} />
-                    <TouchableOpacity onPress={() => this.setState({mode: 'time', showModel: true})}>
+                    (<View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                       <TextInput
-                        placeholder="21:00"
+                        placeholder="Market"
                         placeholderTextColor="#ffcc0040"
-                        value={moment(time).format('HH:mm')}
                         style={{
+                          width: !isEditing ? width - 135 : width - 100,
+                          marginRight: 10,
                           fontSize: 18,
-                          paddingHorizontal: 5,
-                          paddingVertical: 10,
-                          paddingRight: 10,
                           color: '#ffcc00',
+                          paddingHorizontal: 5,
+                          paddingLeft: 0,
+                          paddingVertical: 10,
                         }}
-                        editable={false} />
-                    </TouchableOpacity>
+                        value={currentTodo.place}
+                        onChangeText={txt => {
+                          customSetState({currentTodo: {...currentTodo, place: txt}});
+                          this.placeFinder(getPredictions, txt);
+                        }}
+                        // onFocus={() => this.setState({showPredictions: true})}
+                        onBlur={() => this.setState({showPredictions: false})}
+                        editable={isLocationEditable}
+                      />
+                      {!isEditing && (
+                      <TouchableOpacity style={{height: 32, width: 32, backgroundColor: '#ffcc00', borderRadius: 5, justifyContent: "center", alignItems: 'center'}} onPress={this.handlePopUp}>
+                        <Image source={currentLoc} style={{height: 24, width: 24}} />
+                      </TouchableOpacity>)}
+                    </View>)}
                 </View>
-              </View>)} */}
+              </View>)}
             </View>
 
             {showPredictions && predictions.length === 0 && (
@@ -671,7 +517,7 @@ export default class TodosModal extends React.Component {
               </View>
             )}
 
-            {showPredictions && predictions.length > 0 && (
+            {!showPopup && showPredictions && predictions.length > 0 && (
               <View
                 style={{
                   position: 'relative',
@@ -698,7 +544,7 @@ export default class TodosModal extends React.Component {
                 ))}
               </View>
             )}
-            {isEditing && (
+            {!showPopup && isEditing && (
               <View
                 style={{
                   marginBottom: 15,
@@ -728,7 +574,7 @@ export default class TodosModal extends React.Component {
                 />
               </View>
             )}
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            {!showPopup && (<View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
               <TouchableOpacity
                 style={{
                   backgroundColor: isSaveDisabled ? '#ffcc0040' : '#ffcc00',
@@ -778,7 +624,32 @@ export default class TodosModal extends React.Component {
                   </Text>
                 </TouchableOpacity>
               )}
-            </View>
+            </View>)}
+            {showPopup && (
+              <TouchableOpacity
+              style={{
+                backgroundColor: isAddDisabled ? '#ffcc0040' : '#ffcc00',
+                paddingHorizontal: 10,
+                paddingVertical: 8,
+                borderRadius: 5,
+              }}
+              disabled={isAddDisabled}
+              onPress={() => {
+                this.handleAddLocation();
+                Keyboard.dismiss();
+              }}>
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  color: '#000',
+                  width: width - 60,
+                  textAlign: 'center',
+                }}>
+                Add
+              </Text>
+            </TouchableOpacity>
+            )}
           </View>
         </React.Fragment>
         {showModel && currentTodo.is_birthday && (
