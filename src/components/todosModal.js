@@ -87,7 +87,6 @@ export default class TodosModal extends React.Component {
     const {customSetState, states} = this.props;
     const {currentTodo} = states;
     const {sdate} = this.state;
-    console.log(sdate, 'sdate');
     this.setState({
       showModel: false
     }, () => {
@@ -232,7 +231,6 @@ export default class TodosModal extends React.Component {
     if(place !== null && place.length > 0 && lat !== null && lng !== null){
       isAddDisabled = false;
     }
-    console.log(this.state.place, isAddDisabled, '__isAddDisabled');
     if (
       currentTodo.title !== undefined &&
       currentTodo.title !== null &&
