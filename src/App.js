@@ -113,8 +113,6 @@ class AppClass extends React.Component {
       .get('locations')
       .query(Q.where('userId', info.user.id))
       .fetch();
-
-    console.log(locations, '_:LPCO');
     this.setState({locations});
   };
 
@@ -300,8 +298,6 @@ class AppClass extends React.Component {
       });
     });
     this.setState({locations: [cLocationData, ...this.state.locations]});
-    // this.getAllLocations();
-    console.log('added location');
   };
 
   getPredictions = async q => {
@@ -312,8 +308,6 @@ class AppClass extends React.Component {
     )
       .then(async res => {
         let resp = res.json();
-        console.log(resp, '__resp');
-        // resp = {...resp, response: {...resp.response, venues: [...resp.response.venues, ...placesArr]}};
         return resp;
       })
       .catch(err =>  console.log(err));
@@ -370,11 +364,9 @@ class AppClass extends React.Component {
     
     if (birthdaytodos.length > 0){
       birthdaytodos.map(birthdaytodo => {
-        console.log(birthdaytodo, moment(new Date()).format('hh:mm:ss a'), '__TEST__');
         let beginningTime = moment(birthdaytodo.reminder_date_time_at);
         let endTime1 = moment().subtract(2, 'minutes');
         let endTime2 = moment().add(2, 'minutes');
-        console.log(beginningTime.isBetween(endTime1,endTime2));
         if(beginningTime.isBetween(endTime1,endTime2) && !birthdaytodo.is_notified){
           Notifications.postLocalNotification({
             body: `${birthdaytodo.title.indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} at ${beginningTime.format('DD/MM/YYY hh:mm A')}`,
