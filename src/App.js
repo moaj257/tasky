@@ -26,6 +26,8 @@ import Logo from './assets/images/logo.png';
 import Calendar from './assets/images/calendar.png';
 import Cake from './assets/images/cake-pop.png';
 import Clock from './assets/images/clock.png';
+import CurrentLoc from './assets/images/explorer.png';
+import Back from './assets/images/back.png';
 
 import {WEB_CLIENT_ID} from './utils/keys';
 import {getDistanceFromLatLonInKm, uuid} from './utils/functions';
@@ -50,6 +52,8 @@ class AppClass extends React.Component {
       calendar: Calendar,
       cake: Cake,
       clock: Clock,
+      currentLoc: CurrentLoc,
+      back: Back,
     },
     devInfo: {
       height: height,
@@ -307,20 +311,12 @@ class AppClass extends React.Component {
       `https://api.foursquare.com/v2/venues/search?query=${q}&near=Pondicherry,%20IN&limit=5&v=20200429&client_id=${client_id}&client_secret=${client_secret}`,
     )
       .then(async res => {
-        let placesArr = [];
-        let places = await database.collections
-          .get('places')
-          .query(Q.where('is_active', true), Q.where('name', Q.like(`${q}`)))
-          .fetch();
-        places.map(place => {
-          placesArr = [...placesArr, {...place, location: {lat: place.lat, lng: place.lng}}];
-        });
-
         let resp = res.json();
-        resp = {...resp, response: {...resp.response, venues: [...resp.response.venues, ...placesArr]}};
+        console.log(resp, '__resp');
+        // resp = {...resp, response: {...resp.response, venues: [...resp.response.venues, ...placesArr]}};
         return resp;
       })
-      .catch(err => err.json());
+      .catch(err =>  console.log(err));
   };
 
   handleEditTodos = currentTodo => {
@@ -433,6 +429,7 @@ class AppClass extends React.Component {
           loadTodos={this.loadTodos}
           customSetState={this.customSetState}
           addTodos={this.addTodos}
+          addPlaces={this.addPlaces}
           updateTodos={this.updateTodos}
           deleteTodos={this.deleteTodos}
           handleEditTodos={this.handleEditTodos}
