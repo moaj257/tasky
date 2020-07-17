@@ -378,7 +378,7 @@ class AppClass extends React.Component {
             category: 'TASKY_BIRTHDAY',
             payload: birthdaytodo,
           });
-          this.setState({currentTodo: birthdaytodo}, () => this.updateTodos(birthdaytodo.id, 1));
+          this.setState({currentTodo: {...birthdaytodo, is_complete: true}}, () => this.updateTodos(birthdaytodo.id, 1));
         }
       });
     }
