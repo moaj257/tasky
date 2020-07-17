@@ -37,7 +37,7 @@ export default class DashScreen extends React.Component {
 
   activeX = this.activeOpacity.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -width + (width - 110)],
+    outputRange: [0, 0], //-width + (width - 110)
   });
 
   activeTodosY = this.activeOpacity.interpolate({
@@ -117,8 +117,8 @@ export default class DashScreen extends React.Component {
                     textTransform: 'capitalize',
                   }}>
                   {(active
-                  ? todos.length > 0
-                  : completedTodos.length > 0)
+                  ? todos.length > 0 || completedTodos.length > 0
+                  : todos.length > 0 || completedTodos.length > 0)
                     ? 'Hi '
                     : 'Welcome '}
                   {info.user.givenName}
@@ -127,7 +127,7 @@ export default class DashScreen extends React.Component {
                   {todos.length === 0
                     ? 'Click (+) and add todos.'
                     : `You have ${
-                        active ? todos.length : completedTodos.length
+                        active ? (todos.length > 0 ? todos.length : 'no') : completedTodos.length > 0 ? completedTodos.length : 'no'
                       } ${active ? 'active' : 'completed'} todos.`}
                 </Text>
               </View>
@@ -171,6 +171,8 @@ export default class DashScreen extends React.Component {
               <Animated.View
                 style={{
                   flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-end',
                   position: 'relative',
                   zIndex: 10,
                   transform: [{translateX: this.activeX}],
@@ -178,9 +180,10 @@ export default class DashScreen extends React.Component {
                 <TouchableOpacity onPress={() => this.activeAction()}>
                   <Text
                     style={{
-                      fontSize: 56,
+                      fontSize: this.state.active ? 56 : 25,
                       color: this.state.active ? '#000000' : '#0000007a',
                       fontWeight: 'bold',
+                      marginBottom: this.state.active ? 0 : 10,
                     }}>
                     Active
                   </Text>
@@ -188,10 +191,11 @@ export default class DashScreen extends React.Component {
                 <TouchableOpacity onPress={() => this.completeAction()}>
                   <Text
                     style={{
-                      fontSize: 56,
+                      fontSize: this.state.active ? 25 : 56,
                       color: !this.state.active ? '#000000' : '#0000007a',
                       fontWeight: 'bold',
                       marginLeft: 25,
+                      marginBottom: this.state.active ? 10 : 0,
                     }}>
                     Complete
                   </Text>

@@ -200,8 +200,8 @@ class AppClass extends React.Component {
         todo.title = currentTodo.title;
         todo.place = currentTodo.place;
         todo.is_complete = currentTodo.is_complete;
-        todo.is_active = true;
-        todo.is_notified = is_notified;
+        todo.is_active = currentTodo.is_birthday && is_notified ? false : true;
+        todo.is_notified = is_notified === 1 ? true : false;
         todo.is_birthday = currentTodo.is_birthday;
         todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.lat = currentTodo.lat;
@@ -347,6 +347,7 @@ class AppClass extends React.Component {
         );
         this.setState({lat: nextState.latitude, lng: nextState.longitude});
         if (distance <= 0.5 && !todo.is_notified) {
+          this.setState({currentTodo: todo}, () => this.updateTodos(todo.id, 1));
           Notifications.postLocalNotification({
             body: `${todo.title} at ${todo.place}`,
             title: 'Hey there!',
@@ -358,6 +359,8 @@ class AppClass extends React.Component {
             lat: this.state.lat,
             lng: this.state.lng,
           });
+        } else if(!todo.is_birthday) {
+          this.setState({currentTodo: todo}, () => this.updateTodos(todo.id, 0));
         }
       });
     }
@@ -369,13 +372,13 @@ class AppClass extends React.Component {
         let endTime2 = moment().add(2, 'minutes');
         if(beginningTime.isBetween(endTime1,endTime2) && !birthdaytodo.is_notified){
           Notifications.postLocalNotification({
-            body: `${birthdaytodo.title.indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} at ${beginningTime.format('DD/MM/YYY hh:mm A')}`,
+            body: `${birthdaytodo.title.toLowerCase().indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} now`, //at ${beginningTime.format('DD/MM/YYY hh:mm A')
             title: 'Hey there!',
             silent: false,
             category: 'TASKY_BIRTHDAY',
             payload: birthdaytodo,
           });
-          this.updateTodos(birthdaytodo.id, 1);
+          this.setState({currentTodo: birthdaytodo}, () => this.updateTodos(birthdaytodo.id, 1));
         }
       });
     }
@@ -396,7 +399,6 @@ class AppClass extends React.Component {
   }
 
   componentDidMount() {
-    // this.addPlaces({name: '', lat: '', lng: ''})
     SplashScreen.hide();
     this.subscription = DeviceEventEmitter.addListener(
       NativeModules.LocationManager.JS_LOCATION_EVENT_NAME,
