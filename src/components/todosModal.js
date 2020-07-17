@@ -103,8 +103,8 @@ export default class TodosModal extends React.Component {
     const {showPopup} = this.state;
     Geolocation.getCurrentPosition(
        (position) => {
-          const lat = JSON.stringify(position.coords.longitude);
-          const lng = JSON.stringify(position.coords.latitude);
+          const lat = JSON.stringify(position.coords.latitude);
+          const lng = JSON.stringify(position.coords.longitude);
           this.setState({ showPopup: !showPopup, lat, lng });
        },
        (error) => alert(error.message),
@@ -493,7 +493,7 @@ export default class TodosModal extends React.Component {
               </View>)}
             </View>
 
-            {showPredictions && predictions.length === 0 && (
+            {showPredictions && predictions.length === 0 && !currentTodo.is_birthday && (
               <View
                 style={{
                   position: 'relative',
