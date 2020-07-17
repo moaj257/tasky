@@ -200,7 +200,7 @@ class AppClass extends React.Component {
         todo.title = currentTodo.title;
         todo.place = currentTodo.place;
         todo.is_complete = currentTodo.is_complete;
-        todo.is_active = currentTodo.is_birthday && is_notified ? false : true;
+        todo.is_active = true;
         todo.is_notified = is_notified === 1 ? true : false;
         todo.is_birthday = currentTodo.is_birthday;
         todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
@@ -346,7 +346,7 @@ class AppClass extends React.Component {
           todo.lng,
         );
         this.setState({lat: nextState.latitude, lng: nextState.longitude});
-        if (distance <= 0.5 && !todo.is_notified) {
+        if (distance <= 0.5 && !todo.is_notified && !todo.is_birthday) {
           this.setState({currentTodo: todo}, () => this.updateTodos(todo.id, 1));
           Notifications.postLocalNotification({
             body: `${todo.title} at ${todo.place}`,
