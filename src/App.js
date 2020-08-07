@@ -200,7 +200,7 @@ class AppClass extends React.Component {
         todo.title = currentTodo.title;
         todo.place = currentTodo.place;
         todo.is_complete = currentTodo.is_complete;
-        todo.is_active = currentTodo.is_birthday && is_notified ? false : true;
+        todo.is_active = true;
         todo.is_notified = is_notified === 1 ? true : false;
         todo.is_birthday = currentTodo.is_birthday;
         todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
@@ -346,11 +346,12 @@ class AppClass extends React.Component {
           todo.lng,
         );
         this.setState({lat: nextState.latitude, lng: nextState.longitude});
-        if (distance <= 0.5 && !todo.is_notified) {
+        if (distance <= 0.5 && !todo.is_notified && !todo.is_birthday) {
           this.setState({currentTodo: todo}, () => this.updateTodos(todo.id, 1));
           Notifications.postLocalNotification({
             body: `${todo.title} at ${todo.place}`,
             title: 'Hey there!',
+            sound: 'horse.mp3',
             silent: false,
             category: 'TASKY_LOCATION_NEAR_BY',
             payload: todo,
@@ -374,11 +375,12 @@ class AppClass extends React.Component {
           Notifications.postLocalNotification({
             body: `${birthdaytodo.title.toLowerCase().indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} now`, //at ${beginningTime.format('DD/MM/YYY hh:mm A')
             title: 'Hey there!',
+            sound: 'horse.mp3',
             silent: false,
             category: 'TASKY_BIRTHDAY',
             payload: birthdaytodo,
           });
-          this.setState({currentTodo: birthdaytodo}, () => this.updateTodos(birthdaytodo.id, 1));
+          this.setState({currentTodo: {...birthdaytodo, is_complete: true}}, () => this.updateTodos(birthdaytodo.id, 1));
         }
       });
     }
@@ -407,6 +409,27 @@ class AppClass extends React.Component {
       },
     );
     this.onEnableLocationPress();
+    
+    Notifications.setNotificationChannel({
+      channelId: 'channel_01',
+      name: 'Channel Name',
+      importance: 5,
+      description: 'Channel Description',
+      enableLights: true,
+      enableVibration: true,
+      showBadge: true,
+      soundFile: 'horse.mp3',
+      vibrationPattern: [200, 1000, 500, 1000, 500],
+    });
+
+    // Notifications.postLocalNotification({
+    //   body: `Notification`,
+    //   title: 'Hey there!',
+    //   sound: 'horse.mp3',
+    //   silent: false,
+    //   category: 'TASKY_BIRTHDAY',
+    //   payload: {},
+    // });
   }
 
   componentWillUnmount() {
