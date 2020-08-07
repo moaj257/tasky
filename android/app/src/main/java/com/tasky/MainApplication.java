@@ -15,6 +15,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import com.tasky.location.LocationPackage;
+
 import java.util.List;
 
 public class MainApplication extends MultiDexApplication implements ReactApplication {

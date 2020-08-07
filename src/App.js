@@ -351,6 +351,7 @@ class AppClass extends React.Component {
           Notifications.postLocalNotification({
             body: `${todo.title} at ${todo.place}`,
             title: 'Hey there!',
+            sound: 'horse.mp3',
             silent: false,
             category: 'TASKY_LOCATION_NEAR_BY',
             payload: todo,
@@ -374,6 +375,7 @@ class AppClass extends React.Component {
           Notifications.postLocalNotification({
             body: `${birthdaytodo.title.toLowerCase().indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} now`, //at ${beginningTime.format('DD/MM/YYY hh:mm A')
             title: 'Hey there!',
+            sound: 'horse.mp3',
             silent: false,
             category: 'TASKY_BIRTHDAY',
             payload: birthdaytodo,
@@ -407,6 +409,27 @@ class AppClass extends React.Component {
       },
     );
     this.onEnableLocationPress();
+    
+    Notifications.setNotificationChannel({
+      channelId: 'channel_01',
+      name: 'Channel Name',
+      importance: 5,
+      description: 'Channel Description',
+      enableLights: true,
+      enableVibration: true,
+      showBadge: true,
+      soundFile: 'horse.mp3',
+      vibrationPattern: [200, 1000, 500, 1000, 500],
+    });
+
+    // Notifications.postLocalNotification({
+    //   body: `Notification`,
+    //   title: 'Hey there!',
+    //   sound: 'horse.mp3',
+    //   silent: false,
+    //   category: 'TASKY_BIRTHDAY',
+    //   payload: {},
+    // });
   }
 
   componentWillUnmount() {
