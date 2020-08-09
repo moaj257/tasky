@@ -14,9 +14,11 @@ import {
 import CheckBox from '@react-native-community/checkbox';
 import Geolocation from '@react-native-community/geolocation';
 import DatePicker from 'react-native-date-picker';
+import ModalFilterPicker from 'react-native-modal-filter-picker';
 import moment from 'moment';
 import {Q} from '@nozbe/watermelondb';
 import {database} from '../database';
+import { uuid } from '../utils/functions';
 
 export default class TodosModal extends React.Component {
   state = {
@@ -30,7 +32,9 @@ export default class TodosModal extends React.Component {
     lng: null,
     place: null,
     showModel: false,
+    visible: false,
     sdate: new Date(),
+    list: [],
   };
 
   placeFinder = async (func, q) => {
@@ -121,8 +125,58 @@ export default class TodosModal extends React.Component {
     this.setState({ showPopup: !showPopup });
   }
 
+  toggleVisible = () => this.setState({visible: !this.state.visible});
+
+  handleSelect = async type => {
+    const {list} = this.state;
+    const {customSetState, states} = this.props;
+    const {currentTodo} = states;
+    let label = type.label;
+    if(type.key === 'add-filter'){
+      label = label.substring(4);
+      await this.addEventType(label);
+      this.setState({list: [...list, {key: uuid(), label: label}]});
+    }
+    customSetState({currentTodo: {...currentTodo, type: label}});
+    this.toggleVisible();
+  }
+
+  addEventType = async (eventName) => {
+    let uuid0 = uuid();
+    let date = new Date().getTime();
+    await database.action(async () => {
+      await database.collections.get('event_types').create(event => {
+        event.uuid = uuid0;
+        event.name = eventName;
+        event.is_active = true;
+        event.created_at = date;
+        event.updated_at = date;
+      });
+    });
+  }
+
+  async componentDidMount() {
+    let eventTypes = await database.collections
+      .get('event_types')
+      .query(Q.where('is_active', true))
+      .fetch();
+    let list = [];
+
+    if(eventTypes.length === 0){
+      await this.addEventType('Birthday');
+      await this.addEventType('Annieversary');
+    }
+    
+    eventTypes.map(eventType => {
+      let edata = eventType.getEventType();
+      list.push({key: edata.uuid, label: edata.name});
+    });
+
+    this.setState({list});
+  }
+
   render() {
-    const {predictions, showPredictions, isLocationEditable, sdate, showModel, showPopup, lat, lng, place} = this.state;
+    const {predictions, showPredictions, isLocationEditable, sdate, showModel, showPopup, lat, lng, place, list, visible} = this.state;
     const {
       states,
       toggleAction,
@@ -236,16 +290,18 @@ export default class TodosModal extends React.Component {
       currentTodo.title !== null &&
       currentTodo.title.length > 0
     ) {
-      if(currentTodo.is_birthday && sdate !== undefined && sdate !== null){
+      if(currentTodo.is_reminder && sdate !== undefined && sdate !== null){
         if (isEditing) {
           if (currentTodo.id !== null) {
             isSaveDisabled = false;
           } else {
             isSaveDisabled = true;
           }
-        } else {
-          isSaveDisabled = false;
         }
+        if(currentTodo.type !== undefined && currentTodo.type !== null && currentTodo.reminder_date_time_at != null && currentTodo.reminder_date_time_at !== undefined)
+          isSaveDisabled = false;
+        else
+          isSaveDisabled = true;
       }else if(
         currentTodo.place !== undefined &&
         currentTodo.place !== null &&
@@ -273,7 +329,7 @@ export default class TodosModal extends React.Component {
     return (
       <React.Fragment>
         <React.Fragment>
-          <View style={{position: 'relative'}}>
+          <ScrollView style={{position: 'relative'}}>
             <Image
               source={blob1}
               style={{
@@ -314,13 +370,13 @@ export default class TodosModal extends React.Component {
                       fontWeight: 'bold',
                       color: '#ffffff75',
                     }}>
-                    Birthday Reminder
+                    Reminder
                   </Text>
                   <Switch
                     trackColor={{ false: "#ffffff75", true: "#b36b00" }}
                     thumbColor={"#ff9900"}
-                    onValueChange={ () => customSetState({currentTodo: {...currentTodo, is_birthday: !currentTodo.is_birthday}}) }
-                    value={currentTodo.is_birthday}
+                    onValueChange={ () => customSetState({currentTodo: {...currentTodo, is_reminder: !currentTodo.is_reminder}}) }
+                    value={currentTodo.is_reminder}
                   />
                 </View>)}
               </View>
@@ -348,6 +404,67 @@ export default class TodosModal extends React.Component {
                 <Image source={back} style={{height: 16, width: 16}} />
               </TouchableOpacity>)}
             </View>
+            {currentTodo.is_reminder && list.length > 0 && (
+            <>
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  marginBottom: 5,
+                  color: '#fff',
+                }}>
+                Select Type
+              </Text>
+              <View
+                style={{
+                  marginBottom: 10,
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  borderColor: '#fff',
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                  position: 'relative',
+                }}>
+                <Image
+                  source={text}
+                  style={{marginHorizontal: 5, width: 28, height: 28}}
+                />
+                <ModalFilterPicker
+                  visible={visible}
+                  onSelect={this.handleSelect}
+                  onCancel={this.toggleVisible}
+                  title={'Choose a type'}
+                  noResultsText={'Not available'}
+                  androidUnderlineColor={'transparent'}
+                  titleTextStyle={{fontWeight: 'bold', color: '#fff', fontSize: 24, paddingVertical: 25}}
+                  listContainerStyle={{borderRadius: 10, width: width - 40, backgroundColor: '#fff'}}
+                  cancelContainerStyle={{position: 'absolute', top: 20, right: 0}}
+                  cancelButtonText={'✕'}
+                  cancelButtonStyle={{borderRadius: 50, backgroundColor: '#ffcc00', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 15, paddingVertical: 10}}
+                  cancelButtonTextStyle={{fontSize: 18, fontWeight: 'bold'}}
+                  optionTextStyle={{textTransform: 'capitalize', fontSize: 18, flex: 1, paddingHorizontal: 20}}
+                  options={list}
+                />
+                <TouchableOpacity onPress={this.toggleVisible} style={{flex: 1}}>
+                  <TextInput
+                    placeholder={'Birthday'}
+                    placeholderTextColor="#ffcc0040"
+                    style={{
+                      flex: 1,
+                      fontSize: 18,
+                      textTransform: 'capitalize',
+                      color: '#ffcc00',
+                      paddingHorizontal: 5,
+                      paddingLeft: 0,
+                      paddingVertical: 10,
+                    }}
+                    editable={false}
+                    value={currentTodo.type}
+                  />
+                </TouchableOpacity>
+              </View>
+            </>)}
             <Text
               style={{
                 fontSize: 24,
@@ -355,7 +472,7 @@ export default class TodosModal extends React.Component {
                 marginBottom: 5,
                 color: '#fff',
               }}>
-              {!showPopup ? `${currentTodo.is_birthday ? `Name` : `Title`}` : `Name`}
+              {!showPopup ? `${currentTodo.is_reminder ? `Name` : `Title`}` : `Name`}
             </Text>
             <View
               style={{
@@ -372,7 +489,7 @@ export default class TodosModal extends React.Component {
                 style={{marginHorizontal: 5, width: 28, height: 28}}
               />
               <TextInput
-                placeholder={!showPopup ? `${currentTodo.is_birthday ? `John Doe` : `Green Peas`}` : 'Home'}
+                placeholder={!showPopup ? `${currentTodo.is_reminder ? `John Doe` : `Green Peas`}` : 'Home'}
                 placeholderTextColor="#ffcc0040"
                 style={{
                   flex: 1,
@@ -433,7 +550,7 @@ export default class TodosModal extends React.Component {
                     marginBottom: 5,
                     color: '#fff',
                   }}>
-                  {currentTodo.is_birthday ? `Date & Time` : `Location`}
+                  {currentTodo.is_reminder ? `Date & Time` : `Location`}
                 </Text>
                 <View
                   style={{
@@ -446,8 +563,8 @@ export default class TodosModal extends React.Component {
                     alignItems: 'center',
                     position: 'relative',
                   }}>
-                  <Image source={currentTodo.is_birthday ? calendar : pin} style={{marginHorizontal: 5}} />
-                  {currentTodo.is_birthday ? 
+                  <Image source={currentTodo.is_reminder ? calendar : pin} style={{marginHorizontal: 5}} />
+                  {currentTodo.is_reminder ? 
                     (<TouchableOpacity onPress={() => this.setState({showModel: true})}>
                       <TextInput
                       placeholder="21/03/2020 1:31 AM"
@@ -493,7 +610,7 @@ export default class TodosModal extends React.Component {
               </View>)}
             </View>
 
-            {showPredictions && predictions.length === 0 && !currentTodo.is_birthday && (
+            {showPredictions && predictions.length === 0 && !currentTodo.is_reminder && (
               <View
                 style={{
                   position: 'relative',
@@ -648,9 +765,9 @@ export default class TodosModal extends React.Component {
               </Text>
             </TouchableOpacity>
             )}
-          </View>
+          </ScrollView>
         </React.Fragment>
-        {showModel && currentTodo.is_birthday && (
+        {showModel && currentTodo.is_reminder && (
           <View style={{flex: 1, position: 'absolute', left: 0, bottom: 0, backgroundColor: '#fff', overflow: 'hidden'}}>
             <View style={{position: 'relative', width: width, bottom: 0, left: 20, right: 20, overflow: 'hidden'}}>
               <DatePicker mode="datetime" date={sdate} minimumDate={new Date()} fadeToColor={'#000'} onDateChange={date => this.onChangeTime(date)} />
