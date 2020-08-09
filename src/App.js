@@ -24,13 +24,13 @@ import Cancel from './assets/images/cancel.png';
 import Tick from './assets/images/tick.png';
 import Logo from './assets/images/logo.png';
 import Calendar from './assets/images/calendar.png';
-import Cake from './assets/images/cake-pop.png';
+import Cake from './assets/images/bell.png';
 import Clock from './assets/images/clock.png';
 import CurrentLoc from './assets/images/explorer.png';
 import Back from './assets/images/back.png';
 
 import {WEB_CLIENT_ID} from './utils/keys';
-import {getDistanceFromLatLonInKm, uuid} from './utils/functions';
+import {getDistanceFromLatLonInKm, uuid, capitalize} from './utils/functions';
 import {withLocationPermissions} from './utils/withLocationPermissions';
 import {database} from './database';
 
@@ -75,7 +75,7 @@ class AppClass extends React.Component {
       user: null,
     },
     todos: [],
-    birthdaytodos: [],
+    reminderTodos: [],
     completedTodos: [],
     currentTodo: {
       id: null,
@@ -84,7 +84,8 @@ class AppClass extends React.Component {
       place: null,
       lng: null,
       lat: null,
-      is_birthday: false,
+      is_reminder: false,
+      type: null,
       is_notified: false,
       reminder_date_time_at: null,
       placeId: null,
@@ -123,7 +124,7 @@ class AppClass extends React.Component {
     let todos = [];
     let activeTodos = [];
     let completedTodos = [];
-    let birthdaytodos = [];
+    let reminderTodos = [];
 
     todos = await database.collections
       .get('todos')
@@ -137,13 +138,13 @@ class AppClass extends React.Component {
           ...completedTodos,
         ];
       } else {
-        if(todo.is_birthday)
-          birthdaytodos = [{...todo.getTodo(), id: todo._raw.id}, ...birthdaytodos];
+        if(todo.is_reminder)
+          reminderTodos = [{...todo.getTodo(), id: todo._raw.id}, ...reminderTodos];
         activeTodos = [{...todo.getTodo(), id: todo._raw.id}, ...activeTodos];
       }
     });
 
-    this.setState({todos: activeTodos, completedTodos: completedTodos, birthdaytodos: birthdaytodos}, () => {
+    this.setState({todos: activeTodos, completedTodos: completedTodos, reminderTodos: reminderTodos}, () => {
       this.setState({todosLoading: false, completedTodosLoading: false});
     });
   };
@@ -161,7 +162,8 @@ class AppClass extends React.Component {
         todo.is_active = true;
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
-        todo.is_birthday = currentTodo.is_birthday;
+        todo.is_reminder = currentTodo.is_reminder;
+        todo.type = currentTodo.type;
         todo.is_notified = false;
         todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.placeId = currentTodo.placeId;
@@ -180,7 +182,8 @@ class AppClass extends React.Component {
         place: null,
         lat: null,
         lng: null,
-        is_birthday: false,
+        is_reminder: false,
+        type: null,
         reminder_date_time_at: null,
         placeId: null,
         is_active: true,
@@ -202,7 +205,8 @@ class AppClass extends React.Component {
         todo.is_complete = currentTodo.is_complete;
         todo.is_active = true;
         todo.is_notified = is_notified === 1 ? true : false;
-        todo.is_birthday = currentTodo.is_birthday;
+        todo.is_reminder = currentTodo.is_reminder;
+        todo.type = currentTodo.type;
         todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
@@ -221,7 +225,8 @@ class AppClass extends React.Component {
         place: null,
         lat: null,
         lng: null,
-        is_birthday: false,
+        is_reminder: false,
+        type: null,
         reminder_date_time_at: null,
         placeId: null,
         is_active: true,
@@ -244,7 +249,8 @@ class AppClass extends React.Component {
         todo.is_complete = currentTodo.is_complete;
         todo.is_active = false;
         todo.is_notified = currentTodo.is_notified;
-        todo.is_birthday = currentTodo.is_birthday;
+        todo.is_reminder = currentTodo.is_reminder;
+        todo.type = currentTodo.type;
         todo.reminder_date_time_at = currentTodo.reminder_date_time_at;
         todo.lat = currentTodo.lat;
         todo.lng = currentTodo.lng;
@@ -267,7 +273,8 @@ class AppClass extends React.Component {
         lng: null,
         placeId: null,
         is_active: true,
-        is_birthday: false,
+        is_reminder: false,
+        type: null,
         is_notified: false,
         reminder_date_time_at: null,
         is_complete: false,
@@ -333,7 +340,7 @@ class AppClass extends React.Component {
   };
 
   checkNotifications = async nextState => {
-    const {lat, lng, todos, birthdaytodos} = this.state;
+    const {lat, lng, todos, reminderTodos} = this.state;
     if (
       todos.length > 0 &&
       (lat !== nextState.latitude || lng !== nextState.longitude)
@@ -346,12 +353,12 @@ class AppClass extends React.Component {
           todo.lng,
         );
         this.setState({lat: nextState.latitude, lng: nextState.longitude});
-        if (distance <= 0.5 && !todo.is_notified && !todo.is_birthday) {
+        if (distance <= 0.5 && !todo.is_notified && !todo.is_reminder) {
           this.setState({currentTodo: todo}, () => this.updateTodos(todo.id, 1));
           Notifications.postLocalNotification({
             body: `${todo.title} at ${todo.place}`,
             title: 'Hey there!',
-            sound: 'horse.mp3',
+            sound: 'done.mp3',
             silent: false,
             category: 'TASKY_LOCATION_NEAR_BY',
             payload: todo,
@@ -360,27 +367,27 @@ class AppClass extends React.Component {
             lat: this.state.lat,
             lng: this.state.lng,
           });
-        } else if(!todo.is_birthday) {
+        } else if(!todo.is_reminder) {
           this.setState({currentTodo: todo}, () => this.updateTodos(todo.id, 0));
         }
       });
     }
     
-    if (birthdaytodos.length > 0){
-      birthdaytodos.map(birthdaytodo => {
-        let beginningTime = moment(birthdaytodo.reminder_date_time_at);
+    if (reminderTodos.length > 0){
+      reminderTodos.map(reminderTodo => {
+        let beginningTime = moment(reminderTodo.reminder_date_time_at);
         let endTime1 = moment().subtract(2, 'minutes');
         let endTime2 = moment().add(2, 'minutes');
-        if(beginningTime.isBetween(endTime1,endTime2) && !birthdaytodo.is_notified){
+        if(beginningTime.isBetween(endTime1,endTime2) && !reminderTodo.is_notified){
           Notifications.postLocalNotification({
-            body: `${birthdaytodo.title.toLowerCase().indexOf('wish') === -1 ? 'Wish ' : ''}${birthdaytodo.title} now`, //at ${beginningTime.format('DD/MM/YYY hh:mm A')
-            title: 'Hey there!',
-            sound: 'horse.mp3',
+            body: `${capitalize(reminderTodo.title)}`,
+            title: `${capitalize(reminderTodo.type)}!`,
+            sound: 'done.mp3',
             silent: false,
-            category: 'TASKY_BIRTHDAY',
-            payload: birthdaytodo,
+            category: 'TASKY_REMINDER',
+            payload: reminderTodo,
           });
-          this.setState({currentTodo: {...birthdaytodo, is_complete: true}}, () => this.updateTodos(birthdaytodo.id, 1));
+          this.setState({currentTodo: {...reminderTodo, is_complete: true}}, () => this.updateTodos(reminderTodo.id, 1));
         }
       });
     }
@@ -418,18 +425,9 @@ class AppClass extends React.Component {
       enableLights: true,
       enableVibration: true,
       showBadge: true,
-      soundFile: 'horse.mp3',
+      soundFile: 'done.mp3',
       vibrationPattern: [200, 1000, 500, 1000, 500],
     });
-
-    // Notifications.postLocalNotification({
-    //   body: `Notification`,
-    //   title: 'Hey there!',
-    //   sound: 'horse.mp3',
-    //   silent: false,
-    //   category: 'TASKY_BIRTHDAY',
-    //   payload: {},
-    // });
   }
 
   componentWillUnmount() {

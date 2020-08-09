@@ -44,11 +44,11 @@ export default class TodoItem extends React.Component {
           {todo.title}
         </Text>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Image source={todo.is_birthday ? cake : pin} style={{height: 18, width: 18}} />
+          <Image source={todo.is_reminder ? cake : pin} style={{height: 18, width: 18}} />
           <Text
             style={{fontSize: 16, color: '#0000009a', marginLeft: 5, flex: 1}}
             numberOfLines={1}>
-            {todo.is_birthday ? `Birthday on ${moment(todo.reminder_date_time_at).format('DD/MM/YYYY')} at ${moment(todo.reminder_date_time_at).format('hh:mm A')}` : todo.place}
+            {todo.is_reminder ? `${moment(todo.reminder_date_time_at).format('Do MMMM YYYY on hh:mm: A')}` : todo.place}
           </Text>
         </View>
         <View
