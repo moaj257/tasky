@@ -5035,10 +5035,15 @@ react-native-date-picker@^2.7.10:
   dependencies:
     moment "^2.22.1"
 
-react-native-notifications@^3.1.4:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/react-native-notifications/-/react-native-notifications-3.1.4.tgz#0b78985bfe23801c05f57031f918a553853c70c4"
-  integrity sha512-aGYczr6yXACYnO5mdzWVAMars4llI9jwWPs4HVj+Pj/wnhX9rXR9dJP++HN5RG0LFh2RI6SYS4dpInKJjSgIew==
+react-native-modal-filter-picker@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-modal-filter-picker/-/react-native-modal-filter-picker-2.0.0.tgz#43614990d3026a3b8b8bea803131836b7d3b3cfc"
+  integrity sha512-QioTeGSL53A0q4mJsaahJaXIdxbvTIXdyIn9WEfwRoTldhZtp6L/8ZmxLMiRKvt2qUCA4BIus9eMfSaqGkm5WQ==
+
+react-native-notifications@^3.3.2:
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/react-native-notifications/-/react-native-notifications-3.4.2.tgz#5742a07eb62f61668df0ab8e1c97d470f3101e58"
+  integrity sha512-kJL3fDQu2LaCmz94dpUjWbpXSTwoouHCNpYQgIwNDL4H4lp7h5TNnfoo0owwA0CSz9E1egWz9o3CioM/unZw/w==
 
 react-native-pulse@^1.0.7:
   version "1.0.7"
@@ -6086,9 +6091,9 @@ typedarray@^0.0.6:
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
 ua-parser-js@^0.7.18:
-  version "0.7.21"
-  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.21.tgz#853cf9ce93f642f67174273cc34565ae6f308777"
-  integrity sha512-+O8/qh/Qj8CgC6eYBVBykMrNtp5Gebn4dlGD/kKXVkJNDwyrAwSIqwz8CDf+tsAIWVycKcku6gIXJ0qwx/ZXaQ==
+  version "0.7.28"
+  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.28.tgz#8ba04e653f35ce210239c64661685bf9121dec31"
+  integrity sha512-6Gurc1n//gjp9eQNXjD9O3M/sMwVtN5S8Lv9bvOYBfKfDNiIIhqiyi01vMBO45u4zkDE420w/e0se7Vs+sIg+g==
 
 uglify-es@^3.1.9:
   version "3.3.9"
