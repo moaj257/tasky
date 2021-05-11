@@ -2990,9 +2990,9 @@ hoist-non-react-statics@^3.3.0:
     react-is "^16.7.0"
 
 hosted-git-info@^2.1.4:
-  version "2.8.8"
-  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.8.tgz#7539bd4bc1e0e0a895815a2e0262420b12858488"
-  integrity sha512-f/wzC2QaWBs7t9IYqB4T3sR1xviIViXJRJTWBlx2Gf3g0Xi5vI7Yy4koXQ1c9OYDGHN9sBy1DQ2AB8fqZBWhUg==
+  version "2.8.9"
+  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.9.tgz#dffc0bf9a21c02209090f2aa69429e1414daf3f9"
+  integrity sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==
 
 html-encoding-sniffer@^1.0.2:
   version "1.0.2"
@@ -5035,10 +5035,15 @@ react-native-date-picker@^2.7.10:
   dependencies:
     moment "^2.22.1"
 
-react-native-notifications@^3.1.4:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/react-native-notifications/-/react-native-notifications-3.1.4.tgz#0b78985bfe23801c05f57031f918a553853c70c4"
-  integrity sha512-aGYczr6yXACYnO5mdzWVAMars4llI9jwWPs4HVj+Pj/wnhX9rXR9dJP++HN5RG0LFh2RI6SYS4dpInKJjSgIew==
+react-native-modal-filter-picker@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-modal-filter-picker/-/react-native-modal-filter-picker-2.0.0.tgz#43614990d3026a3b8b8bea803131836b7d3b3cfc"
+  integrity sha512-QioTeGSL53A0q4mJsaahJaXIdxbvTIXdyIn9WEfwRoTldhZtp6L/8ZmxLMiRKvt2qUCA4BIus9eMfSaqGkm5WQ==
+
+react-native-notifications@^3.3.2:
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/react-native-notifications/-/react-native-notifications-3.4.2.tgz#5742a07eb62f61668df0ab8e1c97d470f3101e58"
+  integrity sha512-kJL3fDQu2LaCmz94dpUjWbpXSTwoouHCNpYQgIwNDL4H4lp7h5TNnfoo0owwA0CSz9E1egWz9o3CioM/unZw/w==
 
 react-native-pulse@^1.0.7:
   version "1.0.7"
