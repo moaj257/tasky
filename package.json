@@ -18,7 +18,7 @@
     "@react-native-community/google-signin": "^4.0.0",
     "moment": "^2.26.0",
     "react": "16.11.0",
-    "react-native": "0.62.2",
+    "react-native": "0.62.3",
     "react-native-date-picker": "^2.7.10",
     "react-native-modal-filter-picker": "^2.0.0",
     "react-native-notifications": "^3.3.2",
