@@ -1553,10 +1553,10 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
   integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
 
-base64-js@^1.1.2, base64-js@^1.2.3:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.3.1.tgz#58ece8cb75dd07e71ed08c736abc5fac4dbf8df1"
-  integrity sha512-mLQ4i2QO1ytvGWFWmcngKO//JXAQueZvwEKtjgQFM4jIK0kU+ytMfplL8j+n5mspOfjHwoAg+9yhb7BwAHm36g==
+base64-js@^1.1.2, base64-js@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
+  integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
 
 base@^0.11.1:
   version "0.11.2"
@@ -4879,13 +4879,12 @@ pkg-dir@^3.0.0:
     find-up "^3.0.0"
 
 plist@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/plist/-/plist-3.0.1.tgz#a9b931d17c304e8912ef0ba3bdd6182baf2e1f8c"
-  integrity sha512-GpgvHHocGRyQm74b6FWEZZVRroHKE1I0/BTjAmySaohK+cUn+hZpbqXkc3KWgW3gQYkqcQej35FohcT0FRlkRQ==
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/plist/-/plist-3.0.4.tgz#a62df837e3aed2bb3b735899d510c4f186019cbe"
+  integrity sha512-ksrr8y9+nXOxQB2osVNqrgvX/XQPOXaU4BQMKjYq8PvaY1U18mo+fKgBSwzK+luSyinOuPae956lSVcBwxlAMg==
   dependencies:
-    base64-js "^1.2.3"
+    base64-js "^1.5.1"
     xmlbuilder "^9.0.7"
-    xmldom "0.1.x"
 
 plugin-error@^0.1.2:
   version "0.1.2"
@@ -5035,10 +5034,15 @@ react-native-date-picker@^2.7.10:
   dependencies:
     moment "^2.22.1"
 
-react-native-notifications@^3.1.4:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/react-native-notifications/-/react-native-notifications-3.1.4.tgz#0b78985bfe23801c05f57031f918a553853c70c4"
-  integrity sha512-aGYczr6yXACYnO5mdzWVAMars4llI9jwWPs4HVj+Pj/wnhX9rXR9dJP++HN5RG0LFh2RI6SYS4dpInKJjSgIew==
+react-native-modal-filter-picker@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-modal-filter-picker/-/react-native-modal-filter-picker-2.1.0.tgz#4ec6e8582ab6185ff76f25f67719582ecda0d5be"
+  integrity sha512-uDYHSZf102dYSoI2v/hJLQrP5Q4hR3RBKtIwK/2/5bkRx/mRVduhd62azoa1cPtjCs8k7sYzwlbXVV+1NGFrng==
+
+react-native-notifications@^3.3.2:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/react-native-notifications/-/react-native-notifications-3.5.0.tgz#3a5bff5d2bb140ca09bef831b7d9bd805200fb1d"
+  integrity sha512-uoFvV0jhn+5TcFlGUYEk/nBNyy9I6lWbmjNYvUYrShWyxHl3peeULxuu/A1z2hwhAV9JtJEqEZQrahoX1aT+2g==
 
 react-native-pulse@^1.0.7:
   version "1.0.7"
@@ -6409,11 +6413,6 @@ xmldoc@^1.1.2:
   integrity sha512-ruPC/fyPNck2BD1dpz0AZZyrEwMOrWTO5lDdIXS91rs3wtm4j+T8Rp2o+zoOYkkAxJTZRPOSnOGei1egoRmKMQ==
   dependencies:
     sax "^1.2.1"
-
-xmldom@0.1.x:
-  version "0.1.31"
-  resolved "https://registry.yarnpkg.com/xmldom/-/xmldom-0.1.31.tgz#b76c9a1bd9f0a9737e5a72dc37231cf38375e2ff"
-  integrity sha512-yS2uJflVQs6n+CyjHoaBmVSqIDevTAWrzMmjG1Gc7h1qQ7uVozNhEPJAwZXWyGQ/Gafo3fCwrcaokezLPupVyQ==
 
 xpipe@^1.0.5:
   version "1.0.5"
